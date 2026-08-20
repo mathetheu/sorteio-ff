@@ -10,7 +10,6 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    /* (Estilos mantidos para não quebrar seu layout) */
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background: radial-gradient(circle at top, #0284c7, #0f172a, #020617); color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
     .container { max-width: 760px; width: 100%; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); backdrop-filter: blur(14px); border-radius: 18px; padding: 28px; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6); }
@@ -32,13 +31,14 @@
     .input-group input { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; }
     .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 8px; color: white; font-weight: 800; cursor: pointer; }
     .admin-tools { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid #334155; }
-    .admin-tools h4 { color: #f8fafc; margin-bottom: 10px; font-size: 0.9rem; }
     .btn-action-small { background: #ef4444; border: none; color: white; padding: 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin: 4px; }
     .btn-restore { background: #22c55e; }
-    .roulette-box { background: #050b14; border: 2px solid #0284c7; border-radius: 12px; padding: 15px; text-align: center; }
+    .roulette-box { background: #050b14; border: 2px solid #0284c7; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 10px; }
     .winners-grid { display: grid; gap: 10px; margin-bottom: 20px; }
     .btn-draw { width: 100%; padding: 15px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer; }
-    .checkbox-group { font-size: 0.8rem; color: #94a3b8; }
+    .controls-wrapper { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
+    .btn-qty { background: #1e293b; color: white; border: 1px solid #334155; padding: 5px 12px; cursor: pointer; border-radius: 5px; }
+    .btn-qty.active { background: #0284c7; border: 1px solid #38bdf8; }
   </style>
 </head>
 <body>
@@ -70,23 +70,26 @@
         <div class="input-group"><label>Nick:</label><input type="text" id="regName" required></div>
         <div class="input-group"><label>ID:</label><input type="number" id="regId" required></div>
         <div class="input-group"><label>WhatsApp:</label><input type="tel" id="regPhone" required></div>
-        <div class="checkbox-group"><input type="checkbox" id="regCheck" required> <label>Confirmo as regras.</label></div>
-        <button type="submit" class="btn-submit" id="btnSubmit">Participar</button>
+        <button type="submit" class="btn-submit">Participar</button>
       </form>
     </div>
 
     <div id="sectionDraw" style="display: none;">
-      <div class="winners-grid" id="winnersContainer"></div>
+      <div class="controls-wrapper">
+        <span>Ganhadores:</span>
+        <button class="btn-qty active" onclick="setQty(1)">1</button>
+        <button class="btn-qty" onclick="setQty(2)">2</button>
+        <button class="btn-qty" onclick="setQty(3)">3</button>
+      </div>
+
+      <div id="winnersContainer"></div>
       <button class="btn-draw" id="btnDraw" onclick="startDraw()">Sortear Agora</button>
       
       <div class="admin-tools">
         <h4>⚙️ Backup e Histórico</h4>
-        <div style="margin-bottom:10px;">
-          <span id="dbCounter">Inscritos: 0</span>
-        </div>
-        <button class="btn-action-small" onclick="clearDatabase()">🗑️ Zerar Banco (Auto-Backup)</button>
-        <button class="btn-action-small btn-restore" onclick="restoreBackup()">🔄 Restaurar Último Backup</button>
-        <div style="margin-top:10px; font-size: 0.75rem; color: #94a3b8;">* Ao zerar, os dados são salvos automaticamente no backup.</div>
+        <div id="dbCounter">Inscritos: 0</div>
+        <button class="btn-action-small" onclick="clearDatabase()">🗑️ Zerar Banco</button>
+        <button class="btn-action-small btn-restore" onclick="restoreBackup()">🔄 Restaurar Backup</button>
       </div>
     </div>
   </div>
@@ -106,12 +109,18 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let participantsList = [];
+    let currentQty = 1;
 
     db.ref('participants').on('value', (s) => {
       const data = s.val();
       participantsList = data ? Object.values(data) : [];
       document.getElementById('dbCounter').innerText = `Inscritos no banco: ${participantsList.length}`;
     });
+
+    function setQty(qty) {
+      currentQty = qty;
+      document.querySelectorAll('.btn-qty').forEach((btn, i) => btn.classList.toggle('active', i + 1 === qty));
+    }
 
     function switchTab(tab) {
       if (tab === 'draw' && prompt("Senha:") !== "ggeasy123") return alert("Senha incorreta!");
@@ -126,46 +135,30 @@
       db.ref('participants').push(p).then(() => alert("Cadastrado!"));
     }
 
-    // A MÁGICA DO BACKUP ACONTECE AQUI
     function clearDatabase() {
-      if (!confirm("Isso vai apagar a lista atual, mas salvará um backup automático. Continuar?")) return;
-      
-      db.ref('participants').once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          // Salva no backup antes de apagar
-          db.ref('backups/last_clear').set(data);
-        }
-        db.ref('participants').remove();
-        alert("Lista zerada e backup salvo com sucesso!");
-      });
+      if (!confirm("Salvar backup e zerar?")) return;
+      db.ref('participants').once('value', s => { if(s.val()) db.ref('backups/last').set(s.val()); db.ref('participants').remove(); alert("Zerado!"); });
     }
 
     function restoreBackup() {
-      if (!confirm("Isso vai restaurar o backup da última lista apagada. Continuar?")) return;
-      
-      db.ref('backups/last_clear').once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          db.ref('participants').set(data);
-          alert("Backup restaurado com sucesso!");
-        } else {
-          alert("Nenhum backup encontrado.");
-        }
-      });
+      db.ref('backups/last').once('value', s => { if(s.val()) { db.ref('participants').set(s.val()); alert("Restaurado!"); } else alert("Sem backup."); });
     }
 
     function startDraw() {
-      if (participantsList.length === 0) return alert("Banco vazio!");
-      const winner = participantsList[Math.floor(Math.random() * participantsList.length)];
+      if (participantsList.length < currentQty) return alert("Poucos inscritos!");
+      const container = document.getElementById('winnersContainer');
+      container.innerHTML = '';
       
-      // Salva no arquivo de ganhadores (Histórico)
-      db.ref('archives/winners').push({
-        winner: winner,
-        timestamp: new Date().toLocaleString()
+      const winners = [...participantsList].sort(() => 0.5 - Math.random()).slice(0, currentQty);
+      
+      winners.forEach((w, i) => {
+        const div = document.createElement('div');
+        div.className = 'roulette-box winner';
+        div.innerHTML = `<div class="winner-tag">GANHADOR ${i+1}</div><div class="display-name">${w.name}</div><div class="display-id">ID: ${w.id}</div>`;
+        container.appendChild(div);
+        db.ref('archives/winners').push({ winner: w, time: new Date().toLocaleString() });
       });
-
-      alert("GANHADOR: " + winner.name);
+      confetti({ particleCount: 150, spread: 70 });
     }
   </script>
 </body>
