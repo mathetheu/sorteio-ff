@@ -77,6 +77,7 @@
     .btn-action-small { background: #ef4444; border: none; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin: 4px; }
     .btn-restore { background: #22c55e; }
     .btn-trash { background: #f59e0b; color: #000; font-weight: 700; }
+    .btn-stop-timer { background: #e11d48; color: #fff; font-weight: 700; }
     
     .search-input { width: 100%; background: #090d16; border: 1px solid #334155; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 8px; outline: none; }
     .search-input:focus { border-color: #38bdf8; }
@@ -88,74 +89,21 @@
     .participant-subinfo span { color: #38bdf8; }
     
     .user-actions { display: flex; gap: 6px; }
-    .btn-edit-user {
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid #38bdf8;
-      color: #38bdf8;
-      width: 30px;
-      height: 30px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      flex-shrink: 0;
-      transition: all 0.2s ease;
-    }
+    .btn-edit-user { background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0; transition: all 0.2s ease; }
     .btn-edit-user:hover { background: #0284c7; color: #fff; transform: scale(1.1); }
 
-    .btn-delete-user {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid #ef4444;
-      color: #ef4444;
-      width: 30px;
-      height: 30px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      flex-shrink: 0;
-      transition: all 0.2s ease;
-    }
+    .btn-delete-user { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0; transition: all 0.2s ease; }
     .btn-delete-user:hover { background: #ef4444; color: #fff; transform: scale(1.1); }
     
     .roulette-box { background: #050b14; border: 2px solid #0284c7; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 12px; transition: all 0.2s; }
     .roulette-box.spinning { border-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
     .roulette-box.winner { border-color: #22c55e; background: rgba(34, 197, 94, 0.08); transform: scale(1.02); }
     
-    .winner-details {
-      margin-top: 10px;
-      font-size: 0.85rem;
-      color: #cbd5e1;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      text-align: left;
-      background: rgba(0,0,0,0.3);
-      padding: 10px;
-      border-radius: 8px;
-    }
+    .winner-details { margin-top: 10px; font-size: 0.85rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 6px; text-align: left; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; }
     .winner-link { color: #38bdf8; text-decoration: none; font-weight: 600; }
     .winner-link:hover { text-decoration: underline; }
     
-    .btn-wa-direct {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      background: #22c55e;
-      color: white;
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin-top: 8px;
-      width: 100%;
-    }
+    .btn-wa-direct { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #22c55e; color: white; text-decoration: none; font-size: 0.8rem; font-weight: 700; padding: 8px 12px; border-radius: 6px; margin-top: 8px; width: 100%; }
     .btn-wa-direct:hover { background: #16a34a; }
 
     .btn-draw { width: 100%; padding: 15px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer; margin-bottom: 15px; transition: 0.2s; }
@@ -166,42 +114,10 @@
     .btn-qty { background: #1e293b; color: white; border: 1px solid #334155; padding: 5px 12px; cursor: pointer; border-radius: 5px; }
     .btn-qty.active { background: #0284c7; border: 1px solid #38bdf8; }
 
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.75);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-    .modal-box {
-      background: #0f172a;
-      border: 1px solid #38bdf8;
-      border-radius: 14px;
-      max-width: 520px;
-      width: 100%;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      max-height: 85vh;
-      overflow-y: auto;
-    }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 999; justify-content: center; align-items: center; padding: 16px; }
+    .modal-box { background: #0f172a; border: 1px solid #38bdf8; border-radius: 14px; max-width: 520px; width: 100%; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; flex-direction: column; gap: 14px; max-height: 85vh; overflow-y: auto; }
 
-    .backup-item {
-      background: #090d16;
-      border: 1px solid #334155;
-      padding: 12px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
+    .backup-item { background: #090d16; border: 1px solid #334155; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
     .backup-info { display: flex; flex-direction: column; gap: 2px; }
     .backup-date { font-size: 0.85rem; color: #38bdf8; font-weight: 700; }
     .backup-details { font-size: 0.75rem; color: #cbd5e1; }
@@ -281,8 +197,9 @@
         <input type="text" class="search-input" id="searchInscritos" placeholder="🔍 Pesquisar por Nick, ID, Telefone ou @" oninput="filterParticipants()">
         <div class="participants-list-box" id="participantsListContainer"></div>
 
-        <h4 style="margin-top: 15px;">⚙️ Backup e Histórico</h4>
+        <h4 style="margin-top: 15px;">⚙️ Controle de Tempo & Backups</h4>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+          <button class="btn-action-small btn-stop-timer" onclick="stopTimerDirectly()">⛔ Cancelar / Parar Relógio</button>
           <button class="btn-action-small" onclick="clearDatabase()">🗑️ Salvar & Zerar Banco</button>
           <button class="btn-action-small btn-restore" onclick="openBackupModal()">🔄 Restaurar Backup</button>
           <button class="btn-action-small btn-trash" onclick="openTrashModal()">🗂️ Lixeira de Excluídos</button>
@@ -384,6 +301,15 @@
     let timerDeadline = null;
     let timerInterval = null;
 
+    // Hash SHA-256 da senha de administrador para proteção contra visualização no F12
+    const ADMIN_HASH = "80f4f9f7dc8d123b3a6ee555239a04f24f5a8947f63124803986f3e4e9ef9e7a";
+
+    async function hashString(str) {
+      const buffer = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     function maskPhone(input) {
       let v = input.value.replace(/\D/g, "");
       if (v.length > 11) v = v.substring(0, 11);
@@ -450,6 +376,14 @@
 
       checkCountdown();
       timerInterval = setInterval(checkCountdown, 1000);
+    }
+
+    function stopTimerDirectly() {
+      if (confirm("Deseja cancelar o limite de tempo e deixar as inscrições abertas sem relógio?")) {
+        db.ref('settings/timerDeadline').remove().then(() => {
+          alert("Cronômetro cancelado com sucesso!");
+        });
+      }
     }
 
     db.ref('participants').on('value', (s) => {
@@ -641,8 +575,13 @@
       document.querySelectorAll('.btn-qty').forEach((btn, i) => btn.classList.toggle('active', i + 1 === qty));
     }
 
-    function switchTab(tab) {
-      if (tab === 'draw' && prompt("Senha:") !== "ggeasy22722424") return alert("Senha incorreta!");
+    async function switchTab(tab) {
+      if (tab === 'draw') {
+        const pass = prompt("Senha:");
+        if (!pass) return;
+        const hashed = await hashString(pass);
+        if (hashed !== ADMIN_HASH) return alert("Senha incorreta!");
+      }
       document.getElementById('sectionRegister').style.display = tab === 'register' ? 'block' : 'none';
       document.getElementById('sectionDraw').style.display = tab === 'draw' ? 'block' : 'none';
       document.getElementById('btnSettingsGear').style.display = tab === 'draw' ? 'flex' : 'none';
@@ -683,7 +622,7 @@
 
       db.ref('settings').update(updates).then(() => {
         closeSettingsModal();
-        alert("Configurações do sorteio atualizadas com sucesso!");
+        alert("Configurações atualizadas com sucesso!");
       });
     }
 
@@ -703,7 +642,7 @@
         tiktok: document.getElementById('regTiktok').value.trim()
       };
 
-      if(participantsList.some(x => String(x.id).trim() === p.id)) return alert("ID já cadastrado!");
+      if (participantsList.some(x => String(x.id).trim() === p.id)) return alert("ID já cadastrado!");
 
       db.ref('participants').push(p).then(() => {
         alert("Inscrição confirmada!");
@@ -722,7 +661,7 @@
       
       db.ref('participants').once('value', s => { 
         const data = s.val();
-        if(data) {
+        if (data) {
           const dateStr = new Date().toLocaleString('pt-BR');
           const title = document.getElementById('mainTitle').innerText;
           const subtitle = document.getElementById('mainSubtitle').innerText;
@@ -813,7 +752,7 @@
       container.innerHTML = '';
       
       const boxes = [];
-      for(let i = 0; i < currentQty; i++) {
+      for (let i = 0; i < currentQty; i++) {
         const div = document.createElement('div');
         div.className = 'roulette-box spinning';
         div.innerHTML = `<div class="winner-tag">SORTEANDO GANHADOR ${i+1}...</div><div class="display-name" style="font-size: 1.3rem; color: #f59e0b; margin-top: 5px;">🎰 Girando...</div>`;
