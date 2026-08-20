@@ -13,15 +13,20 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background: radial-gradient(circle at top, #0284c7, #0f172a, #020617); color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
     .container { max-width: 760px; width: 100%; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); backdrop-filter: blur(14px); border-radius: 18px; padding: 28px; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6); }
+    
     .tabs-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
     .tab-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
     .tab-btn.active { background: #0284c7; border-color: #38bdf8; color: #fff; }
+    
     .logo-container { width: 100%; display: flex; justify-content: center; margin-bottom: 12px; }
     .logo-img { width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 3px solid #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
     h1 { text-align: center; color: #38bdf8; font-size: 1.7rem; text-transform: uppercase; margin-bottom: 4px; }
     .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; }
     
     .rules-card { background: #090d16; border: 1px solid #334155; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: 0.85rem; }
+    .rules-card ul { padding-left: 18px; color: #cbd5e1; }
+    .highlight-rule { color: #38bdf8; font-weight: 600; }
+    
     .social-links-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; margin-bottom: 15px; }
     .social-btn { display: flex; align-items: center; justify-content: center; padding: 8px; border-radius: 6px; text-decoration: none; font-size: 0.75rem; font-weight: 700; color: white; }
     .btn-insta { background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); }
@@ -45,7 +50,10 @@
     .participant-item { padding: 8px; border-bottom: 1px solid #1e293b; font-size: 0.85rem; display: flex; justify-content: space-between; }
     
     .roulette-box { background: #050b14; border: 2px solid #0284c7; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 10px; }
+    .roulette-box.spinning { border-color: #f59e0b; }
+    .roulette-box.winner { border-color: #22c55e; transform: scale(1.02); }
     .winners-grid { display: grid; gap: 10px; margin-bottom: 20px; }
+    
     .btn-draw { width: 100%; padding: 15px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer; margin-bottom: 15px; }
     .controls-wrapper { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
     .btn-qty { background: #1e293b; color: white; border: 1px solid #334155; padding: 5px 12px; cursor: pointer; border-radius: 5px; }
@@ -68,8 +76,8 @@
         <h3>⚠️ Regras Obrigatórias</h3>
         <ul>
           <li>Apenas 1 conta/ID por pessoa.</li>
-          <li>📲 Obrigatório estar no grupo do WhatsApp.</li>
-          <li>Obrigatório seguir nas redes sociais abaixo.</li>
+          <li class="highlight-rule">📲 Obrigatório estar no grupo do WhatsApp.</li>
+          <li>Obrigatório seguir nas redes sociais:</li>
         </ul>
         <div class="social-links-grid">
           <a href="https://www.instagram.com/ggeasy" class="social-btn btn-insta">📸 Insta</a>
@@ -89,7 +97,7 @@
           <label class="check-item"><input type="checkbox" id="c4" required> Estou no grupo do WhatsApp</label>
         </div>
 
-        <button type="submit" class="btn-submit">Participar</button>
+        <button type="submit" class="btn-submit">Confirmar Participação</button>
       </form>
     </div>
 
@@ -139,7 +147,7 @@
       const container = document.getElementById('participantsListContainer');
       container.innerHTML = '';
       participantsList.forEach(p => {
-        container.innerHTML += `<div class="participant-item"><span>${p.name}</span> <span>${p.id}</span></div>`;
+        container.innerHTML += `<div class="participant-item"><span>${p.name}</span> <span>ID: ${p.id}</span></div>`;
       });
     });
 
@@ -186,7 +194,7 @@
       winners.forEach((w, i) => {
         const div = document.createElement('div');
         div.className = 'roulette-box winner';
-        div.innerHTML = `<div class="winner-tag">GANHADOR ${i+1}</div><div class="display-name">${w.name}</div><div class="display-id">ID: ${w.id}</div>`;
+        div.innerHTML = `<div class="winner-tag">GANHADOR ${i+1}</div><div class="display-name">${w.name}</div><div class="display-id">ID: ${w.id} | Tel: ${w.phone}</div>`;
         container.appendChild(div);
         db.ref('archives/winners').push({ winner: w, time: new Date().toLocaleString() });
       });
