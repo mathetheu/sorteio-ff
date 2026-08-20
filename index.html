@@ -96,16 +96,11 @@
       flex-shrink: 0;
       transition: all 0.2s ease;
     }
-    .btn-delete-user:hover {
-      background: #ef4444;
-      color: #fff;
-      transform: scale(1.1);
-    }
+    .btn-delete-user:hover { background: #ef4444; color: #fff; transform: scale(1.1); }
     
     .roulette-box { background: #050b14; border: 2px solid #0284c7; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 12px; transition: all 0.2s; }
     .roulette-box.spinning { border-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
     .roulette-box.winner { border-color: #22c55e; background: rgba(34, 197, 94, 0.08); transform: scale(1.02); }
-    .winners-grid { display: grid; gap: 10px; margin-bottom: 20px; }
     
     .winner-details {
       margin-top: 10px;
@@ -147,6 +142,7 @@
     .btn-qty { background: #1e293b; color: white; border: 1px solid #334155; padding: 5px 12px; cursor: pointer; border-radius: 5px; }
     .btn-qty.active { background: #0284c7; border: 1px solid #38bdf8; }
 
+    /* Modais */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -161,14 +157,32 @@
       background: #0f172a;
       border: 1px solid #38bdf8;
       border-radius: 14px;
-      max-width: 450px;
+      max-width: 500px;
       width: 100%;
       padding: 24px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
       display: flex;
       flex-direction: column;
       gap: 14px;
+      max-height: 85vh;
+      overflow-y: auto;
     }
+
+    .backup-item {
+      background: #090d16;
+      border: 1px solid #334155;
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .backup-info { display: flex; flex-direction: column; gap: 2px; }
+    .backup-date { font-size: 0.85rem; color: #38bdf8; font-weight: 700; }
+    .backup-details { font-size: 0.75rem; color: #cbd5e1; }
+    .backup-actions { display: flex; gap: 6px; }
   </style>
 </head>
 <body>
@@ -239,12 +253,13 @@
         <div class="participants-list-box" id="participantsListContainer"></div>
 
         <h4 style="margin-top: 15px;">⚙️ Backup e Histórico</h4>
-        <button class="btn-action-small" onclick="clearDatabase()">🗑️ Zerar Banco</button>
-        <button class="btn-action-small btn-restore" onclick="restoreBackup()">🔄 Restaurar Backup</button>
+        <button class="btn-action-small" onclick="clearDatabase()">🗑️ Salvar & Zerar Banco</button>
+        <button class="btn-action-small btn-restore" onclick="openBackupModal()">🔄 Escolher Backup para Restaurar</button>
       </div>
     </div>
   </div>
 
+  <!-- Modal de Configuração -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-box">
       <h3 style="color: #38bdf8;">⚙️ Configurar Sorteio</h3>
@@ -259,6 +274,18 @@
       <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">
         <button class="btn-action-small" style="background: #475569;" onclick="closeSettingsModal()">Cancelar</button>
         <button class="btn-action-small btn-restore" onclick="saveSettings()">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Escolha de Backup -->
+  <div class="modal-overlay" id="backupModal">
+    <div class="modal-box">
+      <h3 style="color: #22c55e;">🔄 Histórico de Backups Salvos</h3>
+      <p style="font-size: 0.8rem; color: #94a3b8;">Escolha exatamente qual versão você quer puxar de volta para o banco:</p>
+      <div id="backupListContainer" style="margin-top: 8px;"></div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+        <button class="btn-action-small" style="background: #475569;" onclick="closeBackupModal()">Fechar</button>
       </div>
     </div>
   </div>
@@ -435,26 +462,95 @@
       });
     }
 
+    /* SALVAR BACKUP HISTÓRICO E ZERAR */
     function clearDatabase() {
-      if (!confirm("Salvar backup e zerar?")) return;
+      if (!confirm("Deseja criar um backup de segurança e zerar a lista de participantes?")) return;
+      
       db.ref('participants').once('value', s => { 
-        if(s.val()) db.ref('backups/last').set(s.val()); 
+        const data = s.val();
+        if(data) {
+          const dateStr = new Date().toLocaleString('pt-BR');
+          const title = document.getElementById('mainTitle').innerText;
+          const subtitle = document.getElementById('mainSubtitle').innerText;
+          const count = Object.keys(data).length;
+          
+          db.ref('backups/history').push({
+            date: dateStr,
+            raffleName: `${title} - ${subtitle}`,
+            count: count,
+            participants: data
+          });
+        }
         db.ref('participants').remove(); 
-        alert("Zerado com sucesso!"); 
+        alert("Banco salvo no histórico de backups e zerado com sucesso!"); 
       });
     }
 
-    function restoreBackup() {
-      db.ref('backups/last').once('value', s => { 
-        if(s.val()) { 
-          db.ref('participants').set(s.val()); 
-          alert("Restaurado com sucesso!"); 
+    /* MODAL DE HISTÓRICO DE BACKUPS */
+    function openBackupModal() {
+      const container = document.getElementById('backupListContainer');
+      container.innerHTML = '<div style="color: #94a3b8; text-align: center;">Carregando histórico...</div>';
+      document.getElementById('backupModal').style.display = 'flex';
+
+      db.ref('backups/history').once('value', s => {
+        const backups = s.val();
+        container.innerHTML = '';
+
+        if (!backups) {
+          container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">Nenhum backup encontrado no histórico.</div>';
+          return;
+        }
+
+        const keys = Object.keys(backups).reverse(); // Mais recentes primeiro
+        keys.forEach(k => {
+          const b = backups[k];
+          const div = document.createElement('div');
+          div.className = 'backup-item';
+          div.innerHTML = `
+            <div class="backup-info">
+              <span class="backup-date">📅 ${b.date}</span>
+              <span class="backup-details">🏆 ${b.raffleName || 'Sorteio'}</span>
+              <span class="backup-details" style="color: #22c55e;">👥 ${b.count || Object.keys(b.participants || {}).length} inscritos</span>
+            </div>
+            <div class="backup-actions">
+              <button class="btn-action-small btn-restore" onclick="restoreSpecificBackup('${k}')">Restaurar</button>
+              <button class="btn-action-small" onclick="deleteBackupItem('${k}')" title="Excluir este backup">🗑️</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function closeBackupModal() {
+      document.getElementById('backupModal').style.display = 'none';
+    }
+
+    function restoreSpecificBackup(backupKey) {
+      if (!confirm("Restaurar este backup? Os participantes atuais serão substituídos pelos inscritos deste backup.")) return;
+
+      db.ref('backups/history/' + backupKey).once('value', s => {
+        const b = s.val();
+        if (b && b.participants) {
+          db.ref('participants').set(b.participants).then(() => {
+            closeBackupModal();
+            alert(`Backup de "${b.date}" restaurado com sucesso! (${b.count} inscritos)`);
+          });
         } else {
-          alert("Sem backup encontrado.");
+          alert("Não foi possível carregar os dados deste backup.");
         }
       });
     }
 
+    function deleteBackupItem(backupKey) {
+      if (confirm("Excluir permanentemente este backup do histórico?")) {
+        db.ref('backups/history/' + backupKey).remove().then(() => {
+          openBackupModal(); // Recarrega a lista
+        });
+      }
+    }
+
+    /* SORTEIO COM ANIMAÇÃO */
     function startDraw() {
       if (participantsList.length < currentQty) return alert("Poucos inscritos no banco!");
       
