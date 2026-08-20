@@ -128,6 +128,15 @@
       margin-bottom: 14px;
     }
 
+    .rules-card li {
+      margin-bottom: 4px;
+    }
+
+    .highlight-rule {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
     .social-links-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -434,7 +443,7 @@
         <h3>⚠️ Regras Obrigatórias para Participar</h3>
         <ul>
           <li>Apenas <strong>1 conta/ID</strong> por pessoa (contas secundárias serão desclassificadas).</li>
-          <li>Ser membro ativo do grupo de sorteios.</li>
+          <li class="highlight-rule">📲 <strong>Obrigatório estar no Grupo do WhatsApp:</strong> Quem for sorteado e não estiver no grupo no momento do resultado perderá o prêmio e faremos outro sorteio.</li>
           <li><strong>Obrigatório seguir o GGeasy em todas as redes oficiais abaixo</strong> (o ganhador será conferido antes da entrega do codiguin):</li>
         </ul>
 
@@ -467,7 +476,7 @@
 
         <div class="checkbox-group">
           <input type="checkbox" id="regCheck" required>
-          <label for="regCheck">Já segui o <strong>GGeasy</strong> no Instagram, YouTube e TikTok e estou ciente de que haverá conferência.</label>
+          <label for="regCheck">Confirmo que estou no <strong>grupo oficial do WhatsApp</strong> e que segui o <strong>GGeasy</strong> no Instagram, YouTube e TikTok.</label>
         </div>
 
         <button type="submit" class="btn-submit" id="btnSubmit">Garantir Minha Vaga</button>
@@ -552,7 +561,7 @@
 
       if (!check) {
         status.style.color = '#ef4444';
-        status.innerText = "❌ É obrigatório seguir as redes e marcar a confirmação!";
+        status.innerText = "❌ Você precisa aceitar as regras para participar!";
         return;
       }
 
