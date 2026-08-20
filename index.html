@@ -467,54 +467,11 @@
         <span>Lista de Participantes (1 por linha)</span>
         <span id="counter">0 participantes</span>
       </div>
-      <textarea id="rawList" oninput="handleListInput()"></textarea>
+      <textarea id="rawList" placeholder="Cole sua lista de participantes aqui (1 por linha)...&#10;Exemplo:&#10;Jogador 1 – ID: 123456&#10;Jogador 2 – ID: 789101" oninput="handleListInput()"></textarea>
     </div>
   </div>
 
   <script>
-    const defaultList = [
-      "TGG THAY – ID: 314513593",
-      "nitara – ID: 2202160290",
-      "Malvado – ID: 886170581",
-      "TGG MESSITO – ID: 810406734",
-      "TGG PALHAL – ID: 245082515",
-      "WENDSON – ID: 1945434337",
-      "tggsagaz – ID: 1454833728",
-      "Fernando – ID: 167282925",
-      "Raffaaxp – ID: 2351660891",
-      "Turconei – ID: 87438256",
-      "TGG KAUAN – ID: 239162055",
-      "ZSHOT – ID: 485374256",
-      "TGGdaymorena – ID: 2764611852",
-      "TGG CAUÃ 7 – ID: 7082647393",
-      "Ray – ID: 569199092",
-      "teus – ID: 10322721252",
-      "Klaus – ID: 8020511119",
-      "UmaNinja – ID: 1188883821",
-      "Mobila – ID: 836338693",
-      "loirinho – ID: 139146288",
-      "MESSIAS – ID: 1689881152",
-      "gabi cat22 – ID: 1689881152",
-      "TGG RKzinn – ID: 238294435",
-      "hope – ID: 1405544990",
-      "TGG SILVA – ID: 207514577",
-      "belita – ID: 1691349857",
-      "TGG LOIRA - ID: 664204367",
-      "ANTI DVD - ID: 374690065",
-      "TGG Rayane - ID: 828951978",
-      "lhzn.rs - ID: 305793577",
-      "patolino - ID: 302426619",
-      "TGG JOÉLIA - ID: 348181696",
-      "schazam - ID: 334641503",
-      "KG NAYLLIW - ID: 96353590",
-      "TGG Yane - ID: 1516832401",
-      "AG SUICH - ID: 325443234",
-      "TR BANXL - ID: 168463289",
-      "POLO - ID: 233413558",
-      "o novexx™️ - ID: 1693277593",
-      "Gs ful gás - ID: 8592860861"
-    ];
-
     let currentQty = 1;
     let drawCounter = 0;
 
@@ -554,7 +511,7 @@
       const savedTitle = localStorage.getItem('draw_title') || "Sorteio do GGeasy";
       const savedSubtitle = localStorage.getItem('draw_subtitle') || "Codiguin Punho + MP5";
       const savedLogo = localStorage.getItem('draw_logo') || "logo.png";
-      const savedList = localStorage.getItem('draw_list');
+      const savedList = localStorage.getItem('draw_list') || "";
 
       mainTitle.innerText = savedTitle;
       mainSubtitle.innerText = savedSubtitle;
@@ -564,7 +521,7 @@
       inputSubtitle.value = savedSubtitle;
       inputLogo.value = savedLogo;
 
-      textarea.value = savedList !== null ? savedList : defaultList.join('\n');
+      textarea.value = savedList;
       updateCounter();
     }
 
@@ -644,13 +601,12 @@
     function startDraw() {
       const items = getItems();
       if (items.length < currentQty) {
-        alert(`A lista precisa de pelo menos ${currentQty} participantes para este sorteio!`);
+        alert(`A lista precisa de pelo menos ${currentQty} participante(s) para realizar o sorteio!`);
         return;
       }
 
       btnDraw.disabled = true;
 
-      // Reseta os cards
       for (let i = 1; i <= currentQty; i++) {
         document.getElementById(`badge-${i}`).style.display = 'none';
         const box = document.getElementById(`box-${i}`);
@@ -658,20 +614,15 @@
         box.classList.add('spinning');
       }
 
-      // Embaralha para pegar vencedores únicos
       const shuffled = [...items].sort(() => 0.5 - Math.random());
       const selectedWinners = shuffled.slice(0, currentQty).map(parseParticipant);
 
-      let slotIndex = 1;
-
-      // Função que roda a animação de um slot individual
       function spinSlot(idx) {
         const box = document.getElementById(`box-${idx}`);
         const nameEl = document.getElementById(`name-${idx}`);
         const idEl = document.getElementById(`id-${idx}`);
         const badgeEl = document.getElementById(`badge-${idx}`);
 
-        // O primeiro demora ~2.8s, os próximos demoram +1.8s cada (efeito suspense)
         const duration = idx === 1 ? 2800 : 2000;
         const speed = 50;
         const start = Date.now();
@@ -684,7 +635,6 @@
           if (Date.now() - start >= duration) {
             clearInterval(interval);
 
-            // Revela o vencedor desse slot
             const winner = selectedWinners[idx - 1];
             nameEl.innerText = winner.name;
             idEl.innerText = winner.id;
@@ -692,18 +642,15 @@
             box.classList.remove('spinning');
             box.classList.add('winner');
 
-            // Solta confetes individuais para esse vencedor
             confetti({
               particleCount: 80,
               spread: 60,
               origin: { y: 0.6 }
             });
 
-            // Se ainda tem mais vencedores para revelar, parte para o próximo
             if (idx < currentQty) {
               spinSlot(idx + 1);
             } else {
-              // Todos foram revelados
               addHistoryEntry(selectedWinners);
               btnDraw.disabled = false;
             }
@@ -711,7 +658,6 @@
         }, speed);
       }
 
-      // Inicia a animação pelo primeiro vencedor
       spinSlot(1);
     }
 
