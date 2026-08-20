@@ -45,7 +45,7 @@
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .tab-btn {
@@ -101,6 +101,77 @@
       margin-bottom: 20px;
     }
 
+    /* Bloco de Regras e Redes Sociais */
+    .rules-card {
+      background: #090d16;
+      border: 1px solid #334155;
+      border-left: 4px solid #f59e0b;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .rules-card h3 {
+      font-size: 0.95rem;
+      color: #f59e0b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rules-card ul {
+      padding-left: 18px;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .social-links-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 540px) {
+      .social-links-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: white;
+      transition: filter 0.2s ease, transform 0.1s ease;
+    }
+
+    .social-btn:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    .btn-insta {
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    }
+
+    .btn-yt {
+      background: #ef4444;
+    }
+
+    .btn-tiktok {
+      background: #000000;
+      border: 1px solid #334155;
+    }
+
     /* Formulário de Inscrição */
     .form-box {
       background: rgba(2, 6, 23, 0.7);
@@ -133,6 +204,28 @@
     .input-group input:focus {
       outline: none;
       border-color: #38bdf8;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 4px 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      cursor: pointer;
+      accent-color: #0284c7;
+    }
+
+    .checkbox-group label {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      line-height: 1.4;
+      cursor: pointer;
     }
 
     .btn-submit {
@@ -322,8 +415,8 @@
   <div class="container">
     <!-- Navegação de Abas -->
     <div class="tabs-nav">
-      <button class="tab-btn active" id="tabRegisterBtn" onclick="switchTab('register')">📝 Formulário de Inscrição</button>
-      <button class="tab-btn" id="tabDrawBtn" onclick="switchTab('draw')">🎰 Painel de Sorteio (Admin)</button>
+      <button class="tab-btn active" id="tabRegisterBtn" onclick="switchTab('register')">📝 Inscrição</button>
+      <button class="tab-btn" id="tabDrawBtn" onclick="switchTab('draw')">🎰 Painel Admin</button>
     </div>
 
     <div class="logo-container">
@@ -335,6 +428,29 @@
 
     <!-- ABA 1: Inscrição dos Membros -->
     <div id="sectionRegister">
+
+      <!-- Card de Regras e Redes Sociais -->
+      <div class="rules-card">
+        <h3>⚠️ Regras Obrigatórias para Participar</h3>
+        <ul>
+          <li>Apenas <strong>1 conta/ID</strong> por pessoa (contas secundárias serão desclassificadas).</li>
+          <li>Ser membro ativo do grupo de sorteios.</li>
+          <li><strong>Obrigatório seguir o GGeasy em todas as redes oficiais abaixo</strong> (o ganhador será conferido antes da entrega do codiguin):</li>
+        </ul>
+
+        <div class="social-links-grid">
+          <a href="https://www.instagram.com/ggeasy" target="_blank" rel="noopener noreferrer" class="social-btn btn-insta">
+            📸 Instagram @ggeasy
+          </a>
+          <a href="https://www.youtube.com/@GGeasyYT" target="_blank" rel="noopener noreferrer" class="social-btn btn-yt">
+            ▶️ YouTube @GGeasyYT
+          </a>
+          <a href="https://www.tiktok.com/@ggeasyoficial_" target="_blank" rel="noopener noreferrer" class="social-btn btn-tiktok">
+            🎵 TikTok @ggeasyoficial_
+          </a>
+        </div>
+      </div>
+
       <form class="form-box" onsubmit="handleRegistration(event)">
         <div class="input-group">
           <label>Seu Nome / Nick no Jogo:</label>
@@ -348,7 +464,13 @@
           <label>Número do WhatsApp com DDD:</label>
           <input type="tel" id="regPhone" placeholder="Ex: 11999999999" required>
         </div>
-        <button type="submit" class="btn-submit" id="btnSubmit">Garantir Participação</button>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="regCheck" required>
+          <label for="regCheck">Já segui o <strong>GGeasy</strong> no Instagram, YouTube e TikTok e estou ciente de que haverá conferência.</label>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmit">Garantir Minha Vaga</button>
         <div class="status-msg" id="statusMsg"></div>
       </form>
     </div>
@@ -393,7 +515,6 @@
     let participantsList = [];
     let currentQty = 1;
 
-    // Sincroniza em tempo real com o Firebase
     db.ref('participants').on('value', (snapshot) => {
       const data = snapshot.val();
       participantsList = [];
@@ -425,10 +546,16 @@
       const name = document.getElementById('regName').value.trim();
       const id = document.getElementById('regId').value.trim();
       const phone = document.getElementById('regPhone').value.trim();
+      const check = document.getElementById('regCheck').checked;
       const status = document.getElementById('statusMsg');
       const btn = document.getElementById('btnSubmit');
 
-      // Impede IDs repetidos
+      if (!check) {
+        status.style.color = '#ef4444';
+        status.innerText = "❌ É obrigatório seguir as redes e marcar a confirmação!";
+        return;
+      }
+
       const exists = participantsList.some(p => String(p.id).trim() === id);
       if (exists) {
         status.style.color = '#ef4444';
@@ -448,6 +575,7 @@
         document.getElementById('regName').value = '';
         document.getElementById('regId').value = '';
         document.getElementById('regPhone').value = '';
+        document.getElementById('regCheck').checked = false;
         btn.disabled = false;
       }).catch(err => {
         status.style.color = '#ef4444';
