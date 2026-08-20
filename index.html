@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sorteador Oficial</title>
+  <title>Sorteio do GGeasy - Codiguin FF</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -35,77 +40,31 @@
       position: relative;
     }
 
-    .btn-settings {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid #475569;
-      color: #94a3b8;
-      font-size: 1.1rem;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      cursor: pointer;
+    /* Navegação por Abas */
+    .tabs-nav {
       display: flex;
-      align-items: center;
       justify-content: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
       transition: all 0.2s ease;
     }
 
-    .btn-settings:hover {
+    .tab-btn.active {
+      background: #0284c7;
       border-color: #38bdf8;
-      color: #38bdf8;
-      transform: rotate(45deg);
-    }
-
-    .settings-panel {
-      display: none;
-      background: #090d16;
-      border: 1px solid #38bdf8;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
-    }
-
-    .settings-panel.active {
-      display: block;
-    }
-
-    .settings-panel h3 {
-      color: #38bdf8;
-      font-size: 1rem;
-      margin-bottom: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-bottom: 4px;
-    }
-
-    .form-group input {
-      width: 100%;
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #f8fafc;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 0.9rem;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: #38bdf8;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
     }
 
     .logo-container {
@@ -116,19 +75,19 @@
     }
 
     .logo-img {
-      width: 120px;
-      height: 120px;
+      width: 110px;
+      height: 110px;
       object-fit: cover;
       border-radius: 50%;
       border: 3px solid #38bdf8;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.6), inset 0 0 10px rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
       background: #000;
     }
 
     h1 {
       text-align: center;
       color: #38bdf8;
-      font-size: 1.8rem;
+      font-size: 1.7rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 4px;
@@ -138,10 +97,69 @@
     .subtitle {
       text-align: center;
       color: #94a3b8;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       margin-bottom: 20px;
     }
 
+    /* Formulário de Inscrição */
+    .form-box {
+      background: rgba(2, 6, 23, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .input-group input {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+      transition: filter 0.2s;
+    }
+
+    .btn-submit:hover {
+      filter: brightness(1.15);
+    }
+
+    .btn-submit:disabled {
+      background: #475569;
+      cursor: not-allowed;
+    }
+
+    /* Sorteador Admin */
     .controls-wrapper {
       display: flex;
       justify-content: center;
@@ -151,13 +169,6 @@
       background: rgba(2, 6, 23, 0.7);
       padding: 10px 16px;
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .controls-label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #cbd5e1;
     }
 
     .qty-buttons {
@@ -173,19 +184,13 @@
       border-radius: 6px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-qty:hover {
-      border-color: #38bdf8;
-      color: #fff;
     }
 
     .btn-qty.active {
       background: #0284c7;
       border-color: #38bdf8;
       color: #fff;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
     }
 
     .winners-grid {
@@ -195,18 +200,11 @@
       margin-bottom: 20px;
     }
 
-    .winners-grid.cols-2 {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .winners-grid.cols-3 {
-      grid-template-columns: repeat(3, 1fr);
-    }
+    .winners-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .winners-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
 
     @media (max-width: 600px) {
-      .winners-grid.cols-2, .winners-grid.cols-3 {
-        grid-template-columns: 1fr;
-      }
+      .winners-grid.cols-2, .winners-grid.cols-3 { grid-template-columns: 1fr; }
     }
 
     .roulette-box {
@@ -220,18 +218,17 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      transition: all 0.3s ease;
       box-shadow: inset 0 0 20px rgba(2, 132, 199, 0.2);
     }
 
     .roulette-box.spinning {
       border-color: #f59e0b;
-      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4), inset 0 0 15px rgba(245, 158, 11, 0.2);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
     }
 
     .roulette-box.winner {
       border-color: #22c55e;
-      box-shadow: 0 0 25px rgba(34, 197, 94, 0.5), inset 0 0 15px rgba(34, 197, 94, 0.2);
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.5);
       transform: scale(1.02);
     }
 
@@ -256,7 +253,6 @@
       font-size: 0.7rem;
       padding: 3px 8px;
       border-radius: 999px;
-      text-transform: uppercase;
       margin-bottom: 6px;
       animation: pulse 1s infinite alternate;
     }
@@ -272,284 +268,198 @@
       font-size: 1.2rem;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 1px;
       border: none;
       border-radius: 10px;
       background: linear-gradient(135deg, #0284c7, #2563eb);
       color: white;
       cursor: pointer;
       box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-      transition: transform 0.1s ease, filter 0.2s ease;
-    }
-
-    .btn-draw:hover {
-      filter: brightness(1.15);
-    }
-
-    .btn-draw:active {
-      transform: scale(0.98);
     }
 
     .btn-draw:disabled {
       background: #334155;
       cursor: not-allowed;
       box-shadow: none;
-      transform: none;
     }
 
-    .history-section {
-      margin-top: 24px;
+    .admin-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       background: rgba(2, 6, 23, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      padding: 16px;
-    }
-
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .history-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #f1f5f9;
-    }
-
-    .btn-clear-history {
-      background: transparent;
-      border: 1px solid #64748b;
-      color: #94a3b8;
-      font-size: 0.75rem;
-      padding: 4px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-clear-history:hover {
-      border-color: #ef4444;
-      color: #ef4444;
-    }
-
-    .history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 180px;
-      overflow-y: auto;
-    }
-
-    .history-item {
-      background: #090d16;
-      border: 1px solid #1e293b;
-      border-left: 4px solid #38bdf8;
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .history-item-details {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .history-item-winners {
-      color: #38bdf8;
-      font-weight: 600;
-    }
-
-    .history-item-time {
-      font-size: 0.75rem;
-      color: #64748b;
-      white-space: nowrap;
-    }
-
-    .empty-history {
-      color: #64748b;
-      font-size: 0.85rem;
-      text-align: center;
-      padding: 8px 0;
-    }
-
-    .participants-section {
-      margin-top: 24px;
-    }
-
-    .participants-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      color: #cbd5e1;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    textarea {
-      width: 100%;
-      height: 140px;
-      background: #0f172a;
-      border: 1px solid #334155;
+      padding: 12px 16px;
       border-radius: 8px;
-      color: #e2e8f0;
-      padding: 12px;
-      font-size: 0.85rem;
-      resize: vertical;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #cbd5e1;
     }
 
-    textarea:focus {
-      outline: none;
-      border-color: #38bdf8;
+    .btn-action-small {
+      background: #ef4444;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-action-small:hover {
+      background: #dc2626;
+    }
+
+    .status-msg {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <button class="btn-settings" onclick="toggleSettings()" title="Editar Título e Logo">⚙️</button>
-
-    <div class="settings-panel" id="settingsPanel">
-      <h3>⚙️ Configurações do Sorteio</h3>
-      <div class="form-group">
-        <label>Título Principal:</label>
-        <input type="text" id="inputTitle" oninput="saveCustomConfig()">
-      </div>
-      <div class="form-group">
-        <label>Subtítulo / Prêmio:</label>
-        <input type="text" id="inputSubtitle" oninput="saveCustomConfig()">
-      </div>
-      <div class="form-group">
-        <label>Caminho/URL da Logo:</label>
-        <input type="text" id="inputLogo" oninput="saveCustomConfig()" placeholder="Ex: logo.png ou link da internet">
-      </div>
+    <!-- Navegação de Abas -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" id="tabRegisterBtn" onclick="switchTab('register')">📝 Formulário de Inscrição</button>
+      <button class="tab-btn" id="tabDrawBtn" onclick="switchTab('draw')">🎰 Painel de Sorteio (Admin)</button>
     </div>
 
     <div class="logo-container">
-      <img src="logo.png" alt="Logo Sorteio" class="logo-img" id="mainLogo">
+      <img src="logo.png" alt="Logo Sorteio" class="logo-img">
     </div>
 
-    <h1 id="mainTitle">Sorteio do GGeasy</h1>
-    <p class="subtitle" id="mainSubtitle">Codiguin Punho + MP5</p>
+    <h1>Sorteio do GGeasy</h1>
+    <p class="subtitle">Codiguin Punho + MP5</p>
 
-    <div class="controls-wrapper">
-      <span class="controls-label">Quantidade de Ganhadores:</span>
-      <div class="qty-buttons">
-        <button class="btn-qty active" onclick="setQty(1)">1</button>
-        <button class="btn-qty" onclick="setQty(2)">2</button>
-        <button class="btn-qty" onclick="setQty(3)">3</button>
-      </div>
+    <!-- ABA 1: Inscrição dos Membros -->
+    <div id="sectionRegister">
+      <form class="form-box" onsubmit="handleRegistration(event)">
+        <div class="input-group">
+          <label>Seu Nome / Nick no Jogo:</label>
+          <input type="text" id="regName" placeholder="Ex: TGG THAY" required>
+        </div>
+        <div class="input-group">
+          <label>Seu ID no Free Fire:</label>
+          <input type="number" id="regId" placeholder="Ex: 314513593" required>
+        </div>
+        <div class="input-group">
+          <label>Número do WhatsApp com DDD:</label>
+          <input type="tel" id="regPhone" placeholder="Ex: 11999999999" required>
+        </div>
+        <button type="submit" class="btn-submit" id="btnSubmit">Garantir Participação</button>
+        <div class="status-msg" id="statusMsg"></div>
+      </form>
     </div>
 
-    <div class="winners-grid" id="winnersContainer"></div>
-
-    <button class="btn-draw" id="btnDraw" onclick="startDraw()">Sortear Agora</button>
-
-    <div class="history-section">
-      <div class="history-header">
-        <span class="history-title">📜 Histórico de Sorteios</span>
-        <button class="btn-clear-history" onclick="clearHistory()">Limpar Histórico</button>
+    <!-- ABA 2: Sorteador Oficial (Admin) -->
+    <div id="sectionDraw" style="display: none;">
+      <div class="controls-wrapper">
+        <span style="font-size: 0.9rem; font-weight: 600; color: #cbd5e1;">Quantidade de Ganhadores:</span>
+        <div class="qty-buttons">
+          <button class="btn-qty active" onclick="setQty(1)">1</button>
+          <button class="btn-qty" onclick="setQty(2)">2</button>
+          <button class="btn-qty" onclick="setQty(3)">3</button>
+        </div>
       </div>
-      <div class="history-list" id="historyList">
-        <div class="empty-history" id="emptyHistory">Nenhum sorteio realizado nesta sessão.</div>
-      </div>
-    </div>
 
-    <div class="participants-section">
-      <div class="participants-header">
-        <span>Lista de Participantes (1 por linha)</span>
-        <span id="counter">0 participantes</span>
+      <div class="winners-grid" id="winnersContainer"></div>
+
+      <button class="btn-draw" id="btnDraw" onclick="startDraw()">Sortear Agora</button>
+
+      <div class="admin-stats">
+        <span id="dbCounter">Inscritos no banco: 0</span>
+        <button class="btn-action-small" onclick="clearDatabase()">Zerar Lista do Banco</button>
       </div>
-      <textarea id="rawList" placeholder="Cole sua lista de participantes aqui (1 por linha)...&#10;Exemplo:&#10;Jogador 1 – ID: 123456&#10;Jogador 2 – ID: 789101" oninput="handleListInput()"></textarea>
     </div>
   </div>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCl9L87mI-lb4lD1FeilBW0s0caOKYjeDU",
+      authDomain: "sorteio-ggeasy.firebaseapp.com",
+      databaseURL: "https://sorteio-ggeasy-default-rtdb.firebaseio.com",
+      projectId: "sorteio-ggeasy",
+      storageBucket: "sorteio-ggeasy.firebasestorage.app",
+      messagingSenderId: "502362048213",
+      appId: "1:502362048213:web:a67341ed7991045226845c",
+      measurementId: "G-LYSVC0WYH3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let participantsList = [];
     let currentQty = 1;
-    let drawCounter = 0;
 
-    const mainTitle = document.getElementById('mainTitle');
-    const mainSubtitle = document.getElementById('mainSubtitle');
-    const mainLogo = document.getElementById('mainLogo');
-    const inputTitle = document.getElementById('inputTitle');
-    const inputSubtitle = document.getElementById('inputSubtitle');
-    const inputLogo = document.getElementById('inputLogo');
-    const settingsPanel = document.getElementById('settingsPanel');
-    const textarea = document.getElementById('rawList');
-    const winnersContainer = document.getElementById('winnersContainer');
-    const btnDraw = document.getElementById('btnDraw');
-    const counter = document.getElementById('counter');
-    const historyList = document.getElementById('historyList');
-    const emptyHistory = document.getElementById('emptyHistory');
-
-    function toggleSettings() {
-      settingsPanel.classList.toggle('active');
-    }
-
-    function saveCustomConfig() {
-      const titleVal = inputTitle.value.trim() || "Sorteio";
-      const subtitleVal = inputSubtitle.value.trim() || "";
-      const logoVal = inputLogo.value.trim() || "logo.png";
-
-      mainTitle.innerText = titleVal;
-      mainSubtitle.innerText = subtitleVal;
-      mainLogo.src = logoVal;
-
-      localStorage.setItem('draw_title', titleVal);
-      localStorage.setItem('draw_subtitle', subtitleVal);
-      localStorage.setItem('draw_logo', logoVal);
-    }
-
-    function loadCustomConfig() {
-      const savedTitle = localStorage.getItem('draw_title') || "Sorteio do GGeasy";
-      const savedSubtitle = localStorage.getItem('draw_subtitle') || "Codiguin Punho + MP5";
-      const savedLogo = localStorage.getItem('draw_logo') || "logo.png";
-      const savedList = localStorage.getItem('draw_list') || "";
-
-      mainTitle.innerText = savedTitle;
-      mainSubtitle.innerText = savedSubtitle;
-      mainLogo.src = savedLogo;
-
-      inputTitle.value = savedTitle;
-      inputSubtitle.value = savedSubtitle;
-      inputLogo.value = savedLogo;
-
-      textarea.value = savedList;
-      updateCounter();
-    }
-
-    function handleListInput() {
-      updateCounter();
-      localStorage.setItem('draw_list', textarea.value);
-    }
-
-    function getItems() {
-      return textarea.value.split('\n').map(i => i.trim()).filter(i => i.length > 0);
-    }
-
-    function updateCounter() {
-      const items = getItems();
-      counter.innerText = `${items.length} participantes`;
-    }
-
-    function parseParticipant(text) {
-      const parts = text.split(/[-–]/);
-      if (parts.length > 1) {
-        return { name: parts[0].trim(), id: parts.slice(1).join('-').trim() };
+    // Sincroniza em tempo real com o Firebase
+    db.ref('participants').on('value', (snapshot) => {
+      const data = snapshot.val();
+      participantsList = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          participantsList.push(data[key]);
+        });
       }
-      return { name: text, id: '' };
+      document.getElementById('dbCounter').innerText = `Inscritos no banco: ${participantsList.length}`;
+    });
+
+    function switchTab(tab) {
+      if (tab === 'draw') {
+        const pass = prompt("Digite a senha de Admin para acessar o Sorteador:");
+        if (pass !== "ggeasy123") {
+          alert("Senha incorreta!");
+          return;
+        }
+      }
+
+      document.getElementById('sectionRegister').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('sectionDraw').style.display = tab === 'draw' ? 'block' : 'none';
+      document.getElementById('tabRegisterBtn').classList.toggle('active', tab === 'register');
+      document.getElementById('tabDrawBtn').classList.toggle('active', tab === 'draw');
+    }
+
+    function handleRegistration(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const id = document.getElementById('regId').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const status = document.getElementById('statusMsg');
+      const btn = document.getElementById('btnSubmit');
+
+      // Impede IDs repetidos
+      const exists = participantsList.some(p => String(p.id).trim() === id);
+      if (exists) {
+        status.style.color = '#ef4444';
+        status.innerText = "❌ Este ID já está cadastrado no sorteio!";
+        return;
+      }
+
+      btn.disabled = true;
+      db.ref('participants').push({
+        name: name,
+        id: id,
+        phone: phone,
+        date: new Date().toISOString()
+      }).then(() => {
+        status.style.color = '#22c55e';
+        status.innerText = "✅ Inscrição confirmada com sucesso!";
+        document.getElementById('regName').value = '';
+        document.getElementById('regId').value = '';
+        document.getElementById('regPhone').value = '';
+        btn.disabled = false;
+      }).catch(err => {
+        status.style.color = '#ef4444';
+        status.innerText = "Erro ao cadastrar: " + err.message;
+        btn.disabled = false;
+      });
     }
 
     function renderSlots(qty) {
-      winnersContainer.className = `winners-grid ${qty > 1 ? 'cols-' + qty : ''}`;
-      winnersContainer.innerHTML = '';
+      const container = document.getElementById('winnersContainer');
+      container.className = `winners-grid ${qty > 1 ? 'cols-' + qty : ''}`;
+      container.innerHTML = '';
 
       for (let i = 1; i <= qty; i++) {
         const box = document.createElement('div');
@@ -560,7 +470,7 @@
           <div class="display-name" id="name-${i}">Pronto (#${i})</div>
           <div class="display-id" id="id-${i}">Aguardando sorteio...</div>
         `;
-        winnersContainer.appendChild(box);
+        container.appendChild(box);
       }
     }
 
@@ -572,39 +482,19 @@
       renderSlots(qty);
     }
 
-    function addHistoryEntry(winners) {
-      drawCounter++;
-      if (emptyHistory) emptyHistory.style.display = 'none';
-
-      const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const item = document.createElement('div');
-      item.className = 'history-item';
-
-      const winnerText = winners.map(w => `${w.name} (${w.id || 'Sem ID'})`).join(' • ');
-
-      item.innerHTML = `
-        <div class="history-item-details">
-          <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">RODADA #${drawCounter} (${winners.length} GANHADOR${winners.length > 1 ? 'ES' : ''})</span>
-          <span class="history-item-winners">🏆 ${winnerText}</span>
-        </div>
-        <span class="history-item-time">${time}</span>
-      `;
-
-      historyList.prepend(item);
-    }
-
-    function clearHistory() {
-      historyList.innerHTML = '<div class="empty-history" id="emptyHistory">Nenhum sorteio realizado nesta sessão.</div>';
-      drawCounter = 0;
+    function clearDatabase() {
+      if (confirm("Tem certeza que deseja apagar todos os cadastros do banco para um novo sorteio?")) {
+        db.ref('participants').remove();
+      }
     }
 
     function startDraw() {
-      const items = getItems();
-      if (items.length < currentQty) {
-        alert(`A lista precisa de pelo menos ${currentQty} participante(s) para realizar o sorteio!`);
+      if (participantsList.length < currentQty) {
+        alert(`É necessário ter no mínimo ${currentQty} inscritos no banco para sortear!`);
         return;
       }
 
+      const btnDraw = document.getElementById('btnDraw');
       btnDraw.disabled = true;
 
       for (let i = 1; i <= currentQty; i++) {
@@ -614,8 +504,8 @@
         box.classList.add('spinning');
       }
 
-      const shuffled = [...items].sort(() => 0.5 - Math.random());
-      const selectedWinners = shuffled.slice(0, currentQty).map(parseParticipant);
+      const shuffled = [...participantsList].sort(() => 0.5 - Math.random());
+      const selectedWinners = shuffled.slice(0, currentQty);
 
       function spinSlot(idx) {
         const box = document.getElementById(`box-${idx}`);
@@ -628,22 +518,22 @@
         const start = Date.now();
 
         const interval = setInterval(() => {
-          const randomItem = parseParticipant(items[Math.floor(Math.random() * items.length)]);
+          const randomItem = participantsList[Math.floor(Math.random() * participantsList.length)];
           nameEl.innerText = randomItem.name;
-          idEl.innerText = randomItem.id;
+          idEl.innerText = `ID: ${randomItem.id}`;
 
           if (Date.now() - start >= duration) {
             clearInterval(interval);
 
             const winner = selectedWinners[idx - 1];
             nameEl.innerText = winner.name;
-            idEl.innerText = winner.id;
+            idEl.innerText = `ID: ${winner.id} | Tel: ${winner.phone}`;
             badgeEl.style.display = 'inline-block';
             box.classList.remove('spinning');
             box.classList.add('winner');
 
             confetti({
-              particleCount: 80,
+              particleCount: 90,
               spread: 60,
               origin: { y: 0.6 }
             });
@@ -651,7 +541,6 @@
             if (idx < currentQty) {
               spinSlot(idx + 1);
             } else {
-              addHistoryEntry(selectedWinners);
               btnDraw.disabled = false;
             }
           }
@@ -661,7 +550,6 @@
       spinSlot(1);
     }
 
-    loadCustomConfig();
     renderSlots(1);
   </script>
 </body>
