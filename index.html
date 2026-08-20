@@ -21,21 +21,22 @@
     h1 { text-align: center; color: #38bdf8; font-size: 1.7rem; text-transform: uppercase; margin-bottom: 4px; }
     .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; }
     .rules-card { background: #090d16; border: 1px solid #334155; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: 0.85rem; }
+    .rules-card ul { padding-left: 18px; color: #cbd5e1; }
+    .highlight-rule { color: #38bdf8; font-weight: 600; }
+    .social-links-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+    .social-btn { display: flex; align-items: center; justify-content: center; padding: 8px; border-radius: 6px; text-decoration: none; font-size: 0.75rem; font-weight: 700; color: white; }
+    .btn-insta { background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); }
+    .btn-yt { background: #ef4444; }
+    .btn-tiktok { background: #000; border: 1px solid #334155; }
     .form-box { background: rgba(2, 6, 23, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
     .input-group label { display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px; }
     .input-group input { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; }
     .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 8px; color: white; font-weight: 800; cursor: pointer; }
-    
-    /* Painel Admin Ajustado */
     .admin-tools { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid #334155; }
-    .admin-tools h4 { color: #38bdf8; margin-bottom: 10px; font-size: 0.95rem; }
     .btn-action-small { background: #ef4444; border: none; color: white; padding: 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin: 4px; }
     .btn-restore { background: #22c55e; }
-    
-    /* Lista de Inscritos */
     .participants-list-box { background: #000; padding: 10px; border-radius: 8px; border: 1px solid #334155; max-height: 250px; overflow-y: auto; margin-top: 10px; }
     .participant-item { padding: 8px; border-bottom: 1px solid #1e293b; font-size: 0.85rem; display: flex; justify-content: space-between; }
-    
     .roulette-box { background: #050b14; border: 2px solid #0284c7; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 10px; }
     .winners-grid { display: grid; gap: 10px; margin-bottom: 20px; }
     .btn-draw { width: 100%; padding: 15px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer; }
@@ -57,12 +58,17 @@
 
     <div id="sectionRegister">
       <div class="rules-card">
-        <h3>⚠️ Regras</h3>
+        <h3>⚠️ Regras Obrigatórias</h3>
         <ul>
           <li>Apenas 1 conta/ID por pessoa.</li>
-          <li>📲 Obrigatório estar no grupo do WhatsApp.</li>
-          <li>Obrigatório seguir nas redes sociais.</li>
+          <li class="highlight-rule">📲 Obrigatório estar no grupo do WhatsApp.</li>
+          <li>Obrigatório seguir nas redes sociais:</li>
         </ul>
+        <div class="social-links-grid">
+          <a href="https://www.instagram.com/ggeasy" class="social-btn btn-insta">📸 Insta</a>
+          <a href="https://www.youtube.com/@GGeasyYT" class="social-btn btn-yt">▶️ YT</a>
+          <a href="https://www.tiktok.com/@ggeasyoficial_" class="social-btn btn-tiktok">🎵 TikTok</a>
+        </div>
       </div>
       <form class="form-box" onsubmit="handleRegistration(event)">
         <div class="input-group"><label>Nick:</label><input type="text" id="regName" required></div>
@@ -83,12 +89,9 @@
       <div id="winnersContainer"></div>
       <button class="btn-draw" id="btnDraw" onclick="startDraw()">Sortear Agora</button>
       
-      <!-- Painel Admin com Lista e Contagem -->
       <div class="admin-tools">
         <h4>👥 Lista de Inscritos (<span id="dbCounter">0</span>)</h4>
-        <div class="participants-list-box" id="participantsListContainer">
-          <!-- Lista carregada via JS -->
-        </div>
+        <div class="participants-list-box" id="participantsListContainer"></div>
 
         <h4 style="margin-top: 15px;">⚙️ Backup e Histórico</h4>
         <button class="btn-action-small" onclick="clearDatabase()">🗑️ Zerar Banco</button>
@@ -117,18 +120,11 @@
     db.ref('participants').on('value', (s) => {
       const data = s.val();
       participantsList = data ? Object.values(data) : [];
-      
-      // Atualiza contador
       document.getElementById('dbCounter').innerText = participantsList.length;
-      
-      // Atualiza Lista visual
-      const listContainer = document.getElementById('participantsListContainer');
-      listContainer.innerHTML = '';
+      const container = document.getElementById('participantsListContainer');
+      container.innerHTML = '';
       participantsList.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'participant-item';
-        div.innerHTML = `<span><strong>${p.name}</strong></span> <span>ID: ${p.id}</span>`;
-        listContainer.appendChild(div);
+        container.innerHTML += `<div class="participant-item"><span>${p.name}</span> <span>${p.id}</span></div>`;
       });
     });
 
@@ -163,9 +159,7 @@
       if (participantsList.length < currentQty) return alert("Poucos inscritos!");
       const container = document.getElementById('winnersContainer');
       container.innerHTML = '';
-      
       const winners = [...participantsList].sort(() => 0.5 - Math.random()).slice(0, currentQty);
-      
       winners.forEach((w, i) => {
         const div = document.createElement('div');
         div.className = 'roulette-box winner';
