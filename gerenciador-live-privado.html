@@ -562,15 +562,17 @@
   input.value = `(${v.substring(0, 2)}) ${v.substring(2, 7)}-${v.substring(7, 11)}`;
 }
 
-    db.ref('settings').on('value', (s) => {
-      const data = s.val();
-      if (data) {
-        if (data.title) document.getElementById('mainTitle').innerText = data.title;
-        if (data.subtitle) document.getElementById('mainSubtitle').innerText = data.subtitle;
-        timerDeadline = data.timerDeadline || null;
-        updateTimerLogic();
-      }
-    });
+    let currentRaffleTitle = "SORTEIO DO GGEASY";
+
+db.ref('settings').on('value', (s) => {
+  const data = s.val();
+  if (data) {
+    if (data.title) currentRaffleTitle = data.title;
+    if (data.subtitle) document.getElementById('mainSubtitle').innerText = data.subtitle;
+    timerDeadline = data.timerDeadline || null;
+    updateTimerLogic();
+  }
+});
 
     function updateTimerLogic() {
       if (timerInterval) clearInterval(timerInterval);
@@ -804,10 +806,10 @@
     }
 
     function openSettingsModal() {
-      document.getElementById('editTitleInput').value = document.getElementById('mainTitle').innerText;
-      document.getElementById('editSubtitleInput').value = document.getElementById('mainSubtitle').innerText;
-      document.getElementById('settingsModal').style.display = 'flex';
-    }
+  document.getElementById('editTitleInput').value = currentRaffleTitle;
+  document.getElementById('editSubtitleInput').value = document.getElementById('mainSubtitle').innerText;
+  document.getElementById('settingsModal').style.display = 'flex';
+}
 
     function closeSettingsModal() {
       document.getElementById('settingsModal').style.display = 'none';
