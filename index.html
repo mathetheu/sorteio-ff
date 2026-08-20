@@ -46,7 +46,6 @@
     h1 { text-align: center; color: #38bdf8; font-size: 1.7rem; text-transform: uppercase; margin-bottom: 4px; }
     .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 14px; }
     
-    /* Contador Regressivo */
     .timer-badge {
       display: none;
       margin: 0 auto 20px auto;
@@ -336,17 +335,18 @@
       <div class="input-group">
         <label>Tempo Limite de Inscrição:</label>
         <select id="timerOptionSelect" onchange="toggleCustomTimerInput()">
+          <option value="keep">Manter configuração atual</option>
           <option value="none">Sem tempo limite (Inscrições livres)</option>
-          <option value="1h">1 Hora</option>
-          <option value="6h">6 Horas</option>
-          <option value="12h">12 Horas</option>
-          <option value="24h">24 Horas</option>
+          <option value="1h">1 Hora a partir de agora</option>
+          <option value="6h">6 Horas a partir de agora</option>
+          <option value="12h">12 Horas a partir de agora</option>
+          <option value="24h">24 Horas a partir de agora</option>
           <option value="custom">Data e Hora Específica</option>
         </select>
       </div>
 
       <div class="input-group" id="customTimerGroup" style="display: none;">
-        <label>Escolha o encerramento:</label>
+        <label>Escolha a data e hora do encerramento:</label>
         <input type="datetime-local" id="customDateTimeInput">
       </div>
 
@@ -486,4 +486,17 @@
           const days = Math.floor(distance / (1000 * 60 * 60 * 24));
           const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
           const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((distance % (1000 * 60))Opa! Como posso te ajudar hoje?
+          const seconds = Math.floorPara identificar por que o painel de administração não está abrindo, verifique os pontos mais comuns abaixo:
+
+**Verificações Rápidas no Navegador**
+* **Aba anônima:** Abra a URL em uma janela anônima para descartar cache antigo ou cookies corrompidos de sessão.
+* **Console de erros (F12):** Abra o Developer Tools, vá na aba **Console** e recarregue a página para ver se há erros de script (JS), bloqueios de CORS ou falhas de carregamento.
+* **Aba Network:** Veja o status code das requisições principais (`403 Forbidden`, `404 Not Found`, `500 Internal Server Error` ou `502/504 Gateway Timeout`).
+
+**Checagem do Servidor e Aplicação**
+* **Servidor / API rodando:** Se o painel for uma SPA (React, Vue, etc.) que depende de um backend separado, confirme se o backend/API está ativo e respondendo na porta correta.
+* **Logs de erro:** Acesse o terminal/servidor e veja os logs mais recentes da aplicação (ex: `pm2 logs`, `docker logs <container>` ou `tail -f /var/log/nginx/error.log`).
+* **Regras de Firewall / Proxy:** Verifique se as rotas `/admin` não foram bloqueadas por regras de Nginx/Apache, Cloudflare, ou se o IP de origem mudou caso haja whitelist configurada.
+* **Tokens e Permissões:** Se a página carrega em branco logo após o login, confira se o `localStorage`/cookie de autenticação contém o token válido e se o usuário tem a flag de administrador ativa no banco de dados.
+
+Qual é a mensagem de erro, status HTTP ou comportamento exato (ex: tela branca, erro 404/500, loop de redirecionamento) que está aparecendo?
