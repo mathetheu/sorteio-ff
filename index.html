@@ -119,15 +119,15 @@
     let timerInterval = null;
 
     function goToAdmin() {
-      const pass = prompt("Senha de Administrador:");
-      if (!pass) return;
-      if (pass.trim() === "ggeasy22722424") {
-        sessionStorage.setItem("admin_auth", "true");
-        window.location.href = "gerenciador-live-privado.html";
-      } else {
-        alert("Senha incorreta!");
-      }
-    }
+  const pass = prompt("Senha de Administrador:");
+  if (!pass) return;
+  if (pass.trim() === "ggeasy22722424") {
+    sessionStorage.setItem("admin_auth", "true");
+    window.location.href = "gerenciador-live-privado.html"; // <-- Nome atualizado
+  } else {
+    alert("Senha incorreta!");
+  }
+}
 
     function maskPhone(input) {
       let v = input.value.replace(/\D/g, "");
