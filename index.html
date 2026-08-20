@@ -18,7 +18,6 @@
     .tab-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
     .tab-btn.active { background: #0284c7; border-color: #38bdf8; color: #fff; }
     
-    /* Botão de Engrenagem no Painel Admin */
     .btn-settings-gear {
       position: absolute;
       top: 24px;
@@ -71,10 +70,32 @@
     .btn-restore { background: #22c55e; }
     
     .participants-list-box { background: #000; padding: 10px; border-radius: 8px; border: 1px solid #334155; max-height: 250px; overflow-y: auto; margin-top: 10px; }
-    .participant-item { padding: 10px 8px; border-bottom: 1px solid #1e293b; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: flex-start; }
+    .participant-item { padding: 10px 8px; border-bottom: 1px solid #1e293b; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
     .participant-info { display: flex; flex-direction: column; gap: 2px; }
     .participant-subinfo { font-size: 0.75rem; color: #94a3b8; line-height: 1.3; }
     .participant-subinfo span { color: #38bdf8; }
+    
+    /* Botão de Excluir Inscrito Individual */
+    .btn-delete-user {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .btn-delete-user:hover {
+      background: #ef4444;
+      color: #fff;
+      transform: scale(1.1);
+    }
     
     .roulette-box { background: #050b14; border: 2px solid #0284c7; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 10px; }
     .roulette-box.spinning { border-color: #f59e0b; }
@@ -95,7 +116,6 @@
     .btn-qty { background: #1e293b; color: white; border: 1px solid #334155; padding: 5px 12px; cursor: pointer; border-radius: 5px; }
     .btn-qty.active { background: #0284c7; border: 1px solid #38bdf8; }
 
-    /* Modal de Configurações do Sorteio */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -123,7 +143,6 @@
 <body>
 
   <div class="container">
-    <!-- Botão de Engrenagem (Aparece no Painel Admin) -->
     <button class="btn-settings-gear" id="btnSettingsGear" style="display: none;" onclick="openSettingsModal()" title="Editar Nome e Prêmio do Sorteio">⚙️</button>
 
     <div class="tabs-nav">
@@ -193,7 +212,6 @@
     </div>
   </div>
 
-  <!-- Modal de Configuração do Título/Prêmio -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-box">
       <h3 style="color: #38bdf8;">⚙️ Configurar Sorteio</h3>
@@ -229,7 +247,6 @@
     let participantsList = [];
     let currentQty = 1;
 
-    // Sincroniza o Título e Subtítulo salvos no Firebase
     db.ref('settings').on('value', (s) => {
       const data = s.val();
       if (data) {
@@ -238,21 +255,25 @@
       }
     });
 
-    // Sincroniza participantes
     db.ref('participants').on('value', (s) => {
       const data = s.val();
-      participantsList = data ? Object.values(data) : [];
-      document.getElementById('dbCounter').innerText = participantsList.length;
+      participantsList = [];
       const container = document.getElementById('participantsListContainer');
       container.innerHTML = '';
-      participantsList.forEach(p => {
-        const phoneTxt = p.phone || 'Sem Tel';
-        const instaTxt = p.insta || 'Não inf.';
-        const ytTxt = p.yt || 'Não inf.';
-        const tiktokTxt = p.tiktok || 'Não inf.';
 
-        container.innerHTML += `
-          <div class="participant-item">
+      if (data) {
+        Object.keys(data).forEach(key => {
+          const p = data[key];
+          participantsList.push({ ...p, firebaseKey: key });
+
+          const phoneTxt = p.phone || 'Sem Tel';
+          const instaTxt = p.insta || 'Não inf.';
+          const ytTxt = p.yt || 'Não inf.';
+          const tiktokTxt = p.tiktok || 'Não inf.';
+
+          const item = document.createElement('div');
+          item.className = 'participant-item';
+          item.innerHTML = `
             <div class="participant-info">
               <span><strong>${p.name}</strong> (ID: ${p.id})</span>
               <div class="participant-subinfo">
@@ -260,9 +281,22 @@
                 YT: <span>${ytTxt}</span> | TikTok: <span>${tiktokTxt}</span>
               </div>
             </div>
-          </div>`;
-      });
+            <button class="btn-delete-user" onclick="deleteParticipant('${key}', '${p.name}')" title="Apagar participante">❌</button>
+          `;
+          container.appendChild(item);
+        });
+      }
+
+      document.getElementById('dbCounter').innerText = participantsList.length;
     });
+
+    function deleteParticipant(key, name) {
+      if (confirm(`Tem certeza que deseja apagar o participante "${name}" por fraude ou dados inválidos?`)) {
+        db.ref('participants/' + key).remove().then(() => {
+          alert(`Participante "${name}" removido com sucesso!`);
+        });
+      }
+    }
 
     function setQty(qty) {
       currentQty = qty;
@@ -278,7 +312,6 @@
       document.getElementById('tabDrawBtn').classList.toggle('active', tab === 'draw');
     }
 
-    /* Funções do Modal da Engrenagem ⚙️ */
     function openSettingsModal() {
       document.getElementById('editTitleInput').value = document.getElementById('mainTitle').innerText;
       document.getElementById('editSubtitleInput').value = document.getElementById('mainSubtitle').innerText;
