@@ -71,6 +71,7 @@
     .admin-tools h4 { color: #38bdf8; margin-bottom: 10px; font-size: 0.95rem; }
     .btn-action-small { background: #ef4444; border: none; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin: 4px; }
     .btn-restore { background: #22c55e; }
+    .btn-trash { background: #f59e0b; color: #000; font-weight: 700; }
     
     .search-input { width: 100%; background: #090d16; border: 1px solid #334155; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 8px; outline: none; }
     .search-input:focus { border-color: #38bdf8; }
@@ -81,6 +82,24 @@
     .participant-subinfo { font-size: 0.75rem; color: #94a3b8; line-height: 1.3; }
     .participant-subinfo span { color: #38bdf8; }
     
+    .user-actions { display: flex; gap: 6px; }
+    .btn-edit-user {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .btn-edit-user:hover { background: #0284c7; color: #fff; transform: scale(1.1); }
+
     .btn-delete-user {
       background: rgba(239, 68, 68, 0.15);
       border: 1px solid #ef4444;
@@ -157,7 +176,7 @@
       background: #0f172a;
       border: 1px solid #38bdf8;
       border-radius: 14px;
-      max-width: 500px;
+      max-width: 520px;
       width: 100%;
       padding: 24px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
@@ -253,8 +272,11 @@
         <div class="participants-list-box" id="participantsListContainer"></div>
 
         <h4 style="margin-top: 15px;">⚙️ Backup e Histórico</h4>
-        <button class="btn-action-small" onclick="clearDatabase()">🗑️ Salvar & Zerar Banco</button>
-        <button class="btn-action-small btn-restore" onclick="openBackupModal()">🔄 Escolher Backup para Restaurar</button>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+          <button class="btn-action-small" onclick="clearDatabase()">🗑️ Salvar & Zerar Banco</button>
+          <button class="btn-action-small btn-restore" onclick="openBackupModal()">🔄 Restaurar Backup</button>
+          <button class="btn-action-small btn-trash" onclick="openTrashModal()">🗂️ Lixeira de Excluídos</button>
+        </div>
       </div>
     </div>
   </div>
@@ -274,6 +296,36 @@
       <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">
         <button class="btn-action-small" style="background: #475569;" onclick="closeSettingsModal()">Cancelar</button>
         <button class="btn-action-small btn-restore" onclick="saveSettings()">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Edição de Participante -->
+  <div class="modal-overlay" id="editUserModal">
+    <div class="modal-box">
+      <h3 style="color: #38bdf8;">✏️ Editar Participante</h3>
+      <input type="hidden" id="editUserKey">
+      <div class="input-group"><label>Nick:</label><input type="text" id="editUserName" required></div>
+      <div class="input-group"><label>ID:</label><input type="number" id="editUserId" required></div>
+      <div class="input-group"><label>WhatsApp com DDD:</label><input type="tel" id="editUserPhone" oninput="maskPhone(this)" required></div>
+      <div class="input-group"><label>Instagram:</label><input type="text" id="editUserInsta" required></div>
+      <div class="input-group"><label>YouTube:</label><input type="text" id="editUserYt" required></div>
+      <div class="input-group"><label>TikTok:</label><input type="text" id="editUserTiktok" required></div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">
+        <button class="btn-action-small" style="background: #475569;" onclick="closeEditUserModal()">Cancelar</button>
+        <button class="btn-action-small btn-restore" onclick="saveUserEdit()">Salvar Dados</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Lixeira / Excluídos -->
+  <div class="modal-overlay" id="trashModal">
+    <div class="modal-box">
+      <h3 style="color: #f59e0b;">🗂️ Lixeira de Participantes Excluídos</h3>
+      <p style="font-size: 0.8rem; color: #94a3b8;">Estes participantes foram removidos. Você pode restaurá-los de volta à lista ativa a qualquer momento:</p>
+      <div id="trashListContainer" style="margin-top: 8px;"></div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+        <button class="btn-action-small" style="background: #475569;" onclick="closeTrashModal()">Fechar</button>
       </div>
     </div>
   </div>
@@ -367,7 +419,10 @@
               YT: <span>${ytTxt}</span> | TikTok: <span>${tiktokTxt}</span>
             </div>
           </div>
-          <button class="btn-delete-user" onclick="deleteParticipant('${p.firebaseKey}', '${p.name}')" title="Apagar participante">❌</button>
+          <div class="user-actions">
+            <button class="btn-edit-user" onclick="openEditUserModal('${p.firebaseKey}')" title="Editar dados">✏️</button>
+            <button class="btn-delete-user" onclick="deleteParticipant('${p.firebaseKey}', '${p.name}')" title="Mover para lixeira">❌</button>
+          </div>
         `;
         container.appendChild(item);
       });
@@ -390,10 +445,129 @@
       renderParticipants(filtered);
     }
 
+    /* EXCLUSÃO COM ENVIO PARA A LIXEIRA */
     function deleteParticipant(key, name) {
-      if (confirm(`Tem certeza que deseja apagar o participante "${name}" por fraude ou dados inválidos?`)) {
-        db.ref('participants/' + key).remove().then(() => {
-          alert(`Participante "${name}" removido com sucesso!`);
+      if (confirm(`Tem certeza que deseja apagar o participante "${name}"? Ele será movido para a Lixeira e você poderá recuperá-lo se quiser.`)) {
+        db.ref('participants/' + key).once('value', s => {
+          const userData = s.val();
+          if (userData) {
+            // Salva na lixeira com a data de exclusão
+            db.ref('deleted_participants').push({
+              ...userData,
+              deletedAt: new Date().toLocaleString('pt-BR')
+            });
+            // Remove da lista ativa
+            db.ref('participants/' + key).remove().then(() => {
+              alert(`Participante "${name}" movido para a lixeira!`);
+            });
+          }
+        });
+      }
+    }
+
+    /* MODAL DE EDIÇÃO DIRETA */
+    function openEditUserModal(key) {
+      const p = participantsList.find(x => x.firebaseKey === key);
+      if (!p) return;
+
+      document.getElementById('editUserKey').value = key;
+      document.getElementById('editUserName').value = p.name || '';
+      document.getElementById('editUserId').value = p.id || '';
+      document.getElementById('editUserPhone').value = p.phone || '';
+      document.getElementById('editUserInsta').value = p.insta || '';
+      document.getElementById('editUserYt').value = p.yt || '';
+      document.getElementById('editUserTiktok').value = p.tiktok || '';
+      
+      document.getElementById('editUserModal').style.display = 'flex';
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('editUserModal').style.display = 'none';
+    }
+
+    function saveUserEdit() {
+      const key = document.getElementById('editUserKey').value;
+      const updated = {
+        name: document.getElementById('editUserName').value.trim(),
+        id: document.getElementById('editUserId').value.trim(),
+        phone: document.getElementById('editUserPhone').value.trim(),
+        insta: document.getElementById('editUserInsta').value.trim(),
+        yt: document.getElementById('editUserYt').value.trim(),
+        tiktok: document.getElementById('editUserTiktok').value.trim()
+      };
+
+      if (!updated.name || !updated.id || !updated.phone) return alert("Preencha ao menos Nome, ID e Telefone!");
+
+      db.ref('participants/' + key).update(updated).then(() => {
+        closeEditUserModal();
+        alert("Dados do participante atualizados com sucesso!");
+      });
+    }
+
+    /* MODAL DA LIXEIRA DE EXCLUÍDOS */
+    function openTrashModal() {
+      const container = document.getElementById('trashListContainer');
+      container.innerHTML = '<div style="color: #94a3b8; text-align: center;">Carregando excluídos...</div>';
+      document.getElementById('trashModal').style.display = 'flex';
+
+      db.ref('deleted_participants').once('value', s => {
+        const deletedData = s.val();
+        container.innerHTML = '';
+
+        if (!deletedData) {
+          container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">A lixeira está vazia.</div>';
+          return;
+        }
+
+        Object.keys(deletedData).reverse().forEach(k => {
+          const p = deletedData[k];
+          const div = document.createElement('div');
+          div.className = 'backup-item';
+          div.innerHTML = `
+            <div class="backup-info">
+              <span class="backup-date">👤 ${p.name} (ID: ${p.id})</span>
+              <span class="backup-details">Tel: ${p.phone || 'Sem Tel'} | Insta: ${p.insta || 'Não inf.'}</span>
+              <span class="backup-details" style="color: #ef4444; font-size: 0.7rem;">Excluído em: ${p.deletedAt || 'Data não registrada'}</span>
+            </div>
+            <div class="backup-actions">
+              <button class="btn-action-small btn-restore" onclick="restoreParticipantFromTrash('${k}')" title="Restaurar de volta para o sorteio">Restaurar</button>
+              <button class="btn-action-small" onclick="deleteParticipantPermanent('${k}')" title="Apagar definitivamente">🗑️</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function closeTrashModal() {
+      document.getElementById('trashModal').style.display = 'none';
+    }
+
+    function restoreParticipantFromTrash(key) {
+      db.ref('deleted_participants/' + key).once('value', s => {
+        const p = s.val();
+        if (p) {
+          const { deletedAt, ...activeUser } = p;
+          
+          // Verifica se o ID já voltou a existir na lista ativa
+          if (participantsList.some(x => String(x.id).trim() === String(activeUser.id).trim())) {
+            return alert("Este ID já está presente na lista ativa de participantes!");
+          }
+
+          db.ref('participants').push(activeUser).then(() => {
+            db.ref('deleted_participants/' + key).remove().then(() => {
+              openTrashModal(); // Recarrega a lixeira
+              alert(`"${activeUser.name}" foi restaurado com sucesso para a lista de participantes!`);
+            });
+          });
+        }
+      });
+    }
+
+    function deleteParticipantPermanent(key) {
+      if (confirm("Apagar este participante definitivamente da lixeira? Esta ação não pode ser desfeita.")) {
+        db.ref('deleted_participants/' + key).remove().then(() => {
+          openTrashModal();
         });
       }
     }
@@ -462,7 +636,6 @@
       });
     }
 
-    /* SALVAR BACKUP HISTÓRICO E ZERAR */
     function clearDatabase() {
       if (!confirm("Deseja criar um backup de segurança e zerar a lista de participantes?")) return;
       
@@ -486,7 +659,6 @@
       });
     }
 
-    /* MODAL DE HISTÓRICO DE BACKUPS */
     function openBackupModal() {
       const container = document.getElementById('backupListContainer');
       container.innerHTML = '<div style="color: #94a3b8; text-align: center;">Carregando histórico...</div>';
@@ -501,7 +673,7 @@
           return;
         }
 
-        const keys = Object.keys(backups).reverse(); // Mais recentes primeiro
+        const keys = Object.keys(backups).reverse();
         keys.forEach(k => {
           const b = backups[k];
           const div = document.createElement('div');
@@ -545,12 +717,11 @@
     function deleteBackupItem(backupKey) {
       if (confirm("Excluir permanentemente este backup do histórico?")) {
         db.ref('backups/history/' + backupKey).remove().then(() => {
-          openBackupModal(); // Recarrega a lista
+          openBackupModal();
         });
       }
     }
 
-    /* SORTEIO COM ANIMAÇÃO */
     function startDraw() {
       if (participantsList.length < currentQty) return alert("Poucos inscritos no banco!");
       
