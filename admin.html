@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Sorteio do GGeasy</title>
+  
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: radial-gradient(circle at top, #0284c7, #0f172a, #020617); color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
+    .container { max-width: 760px; width: 100%; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); backdrop-filter: blur(14px); border-radius: 18px; padding: 28px; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6); position: relative; }
+    
+    .btn-settings-gear { position: absolute; top: 24px; right: 24px; background: #1e293b; border: 1px solid #334155; color: #38bdf8; font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s ease; }
+    .btn-settings-gear:hover { background: #0284c7; color: #fff; transform: rotate(45deg); }
+
+    .logo-container { width: 100%; display: flex; justify-content: center; margin-bottom: 12px; }
+    .logo-img { width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 3px solid #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
+    h1 { text-align: center; color: #38bdf8; font-size: 1.7rem; text-transform: uppercase; margin-bottom: 4px; }
+    .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 14px; }
+    
+    .timer-badge { display: none; margin: 0 auto 16px auto; background: rgba(2, 6, 23, 0.85); border: 1px solid #38bdf8; border-radius: 30px; padding: 8px 18px; font-size: 0.9rem; font-weight: 700; color: #38bdf8; text-align: center; width: fit-content; }
+    .timer-badge.expired { border-color: #ef4444; color: #ef4444; }
+
+    .input-group label { display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px; }
+    .input-group input, .input-group select { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; outline: none; }
+    .input-group input:focus, .input-group select:focus { border-color: #38bdf8; }
+    
+    .admin-tools { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid #334155; }
+    .admin-tools h4 { color: #38bdf8; margin-bottom: 10px; font-size: 0.95rem; }
+    .btn-action-small { background: #ef4444; border: none; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin: 4px; }
+    .btn-restore { background: #22c55e; }
+    .btn-trash { background: #f59e0b; color: #000; font-weight: 700; }
+    .btn-stop-timer { background: #e11d48; color: #fff; font-weight: 700; }
+    
+    .search-input { width: 100%; background: #090d16; border: 1px solid #334155; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 8px; outline: none; }
+    .search-input:focus { border-color: #38bdf8; }
+
+    .participants-list-box { background: #000; padding: 10px; border-radius: 8px; border: 1px solid #334155; max-height: 250px; overflow-y: auto; margin-top: 5px; }
+    .participant-item { padding: 10px 8px; border-bottom: 1px solid #1e293b; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .participant-info { display: flex; flex-direction: column; gap: 2px; }
+    .participant-subinfo { font-size: 0.75rem; color: #94a3b8; line-height: 1.3; }
+    .participant-subinfo span { color: #38bdf8; }
+    
+    .user-actions { display: flex; gap: 6px; }
+    .btn-edit-user { background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0; }
+    .btn-edit-user:hover { background: #0284c7; color: #fff; }
+    .btn-delete-user { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0; }
+    .btn-delete-user:hover { background: #ef4444; color: #fff; }
+    
+    .roulette-box { background: #050b14; border: 2px solid #0284c7; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 12px; }
+    .roulette-box.spinning { border-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
+    .roulette-box.winner { border-color: #22c55e; background: rgba(34, 197, 94, 0.08); transform: scale(1.02); }
+    
+    .winner-details { margin-top: 10px; font-size: 0.85rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 6px; text-align: left; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; }
+    .winner-link { color: #38bdf8; text-decoration: none; font-weight: 600; }
+    .btn-wa-direct { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #22c55e; color: white; text-decoration: none; font-size: 0.8rem; font-weight: 700; padding: 8px 12px; border-radius: 6px; margin-top: 8px; width: 100%; }
+
+    .btn-draw { width: 100%; padding: 15px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer; margin-bottom: 15px; }
+    .btn-draw:hover { filter: brightness(1.1); }
+    .btn-draw:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .controls-wrapper { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
+    .btn-qty { background: #1e293b; color: white; border: 1px solid #334155; padding: 5px 12px; cursor: pointer; border-radius: 5px; }
+    .btn-qty.active { background: #0284c7; border: 1px solid #38bdf8; }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); z-index: 999; justify-content: center; align-items: center; padding: 16px; }
+    .modal-box { background: #0f172a; border: 1px solid #38bdf8; border-radius: 14px; max-width: 520px; width: 100%; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); display: flex; flex-direction: column; gap: 14px; max-height: 85vh; overflow-y: auto; }
+    .backup-item { background: #090d16; border: 1px solid #334155; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .backup-info { display: flex; flex-direction: column; gap: 2px; }
+    .backup-date { font-size: 0.85rem; color: #38bdf8; font-weight: 700; }
+    .backup-details { font-size: 0.75rem; color: #cbd5e1; }
+    .backup-actions { display: flex; gap: 6px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <button class="btn-settings-gear" onclick="openSettingsModal()" title="Configurar Sorteio & Tempo">⚙️</button>
+
+    <div class="logo-container"><img src="logo.png" alt="Logo" class="logo-img"></div>
+    <h1 id="mainTitle">PAINEL ADMIN - GGEASY</h1>
+    <p class="subtitle" id="mainSubtitle">Codiguin Punho + MP5</p>
+
+    <!-- Badge do Cronômetro -->
+    <div class="timer-badge" id="timerDisplay">⏳ Inscrições encerram em: <span id="countdownText">--:--:--</span></div>
+
+    <div class="controls-wrapper">
+      <span>Ganhadores:</span>
+      <button class="btn-qty active" onclick="setQty(1)">1</button>
+      <button class="btn-qty" onclick="setQty(2)">2</button>
+      <button class="btn-qty" onclick="setQty(3)">3</button>
+    </div>
+
+    <div id="winnersContainer"></div>
+    <button class="btn-draw" id="btnDraw" onclick="startDraw()">Sortear Agora</button>
+    
+    <div class="admin-tools">
+      <h4>👥 Lista de Inscritos (<span id="dbCounter">0</span>)</h4>
+      <input type="text" class="search-input" id="searchInscritos" placeholder="🔍 Pesquisar por Nick, ID, Telefone ou @" oninput="filterParticipants()">
+      <div class="participants-list-box" id="participantsListContainer"></div>
+
+      <h4 style="margin-top: 15px;">⚙️ Controle de Tempo & Backups</h4>
+      <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+        <button class="btn-action-small btn-stop-timer" onclick="stopTimerDirectly()">⛔ Cancelar / Parar Relógio</button>
+        <button class="btn-action-small" onclick="clearDatabase()">🗑️ Salvar & Zerar Banco</button>
+        <button class="btn-action-small btn-restore" onclick="openBackupModal()">🔄 Restaurar Backup</button>
+        <button class="btn-action-small btn-trash" onclick="openTrashModal()">🗂️ Lixeira de Excluídos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Configuração -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-box">
+      <h3 style="color: #38bdf8;">⚙️ Configurar Sorteio</h3>
+      <div class="input-group">
+        <label>Nome do Sorteio (Título):</label>
+        <input type="text" id="editTitleInput" placeholder="Ex: SORTEIO DO GGEASY">
+      </div>
+      <div class="input-group">
+        <label>O que é o Sorteio (Subtítulo / Prêmio):</label>
+        <input type="text" id="editSubtitleInput" placeholder="Ex: Codiguin Punho + MP5">
+      </div>
+      
+      <div class="input-group">
+        <label>Tempo Limite de Inscrição:</label>
+        <select id="timerOptionSelect">
+          <option value="keep">Manter configuração atual</option>
+          <option value="none">Sem tempo limite (Inscrições livres)</option>
+          <option value="1h">1 Hora a partir de agora</option>
+          <option value="6h">6 Horas a partir de agora</option>
+          <option value="12h">12 Horas a partir de agora</option>
+          <option value="24h">24 Horas a partir de agora</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">
+        <button class="btn-action-small" style="background: #475569;" onclick="closeSettingsModal()">Cancelar</button>
+        <button class="btn-action-small btn-restore" onclick="saveSettings()">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Edição de Participante -->
+  <div class="modal-overlay" id="editUserModal">
+    <div class="modal-box">
+      <h3 style="color: #38bdf8;">✏️ Editar Participante</h3>
+      <input type="hidden" id="editUserKey">
+      <div class="input-group"><label>Nick:</label><input type="text" id="editUserName" required></div>
+      <div class="input-group"><label>ID:</label><input type="number" id="editUserId" required></div>
+      <div class="input-group"><label>WhatsApp com DDD:</label><input type="tel" id="editUserPhone" oninput="maskPhone(this)" required></div>
+      <div class="input-group"><label>Instagram:</label><input type="text" id="editUserInsta" required></div>
+      <div class="input-group"><label>YouTube:</label><input type="text" id="editUserYt" required></div>
+      <div class="input-group"><label>TikTok:</label><input type="text" id="editUserTiktok" required></div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">
+        <button class="btn-action-small" style="background: #475569;" onclick="closeEditUserModal()">Cancelar</button>
+        <button class="btn-action-small btn-restore" onclick="saveUserEdit()">Salvar Dados</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Lixeira / Excluídos -->
+  <div class="modal-overlay" id="trashModal">
+    <div class="modal-box">
+      <h3 style="color: #f59e0b;">🗂️ Lixeira de Participantes Excluídos</h3>
+      <p style="font-size: 0.8rem; color: #94a3b8;">Estes participantes foram removidos. Você pode restaurá-los:</p>
+      <div id="trashListContainer" style="margin-top: 8px;"></div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+        <button class="btn-action-small" style="background: #475569;" onclick="closeTrashModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Escolha de Backup -->
+  <div class="modal-overlay" id="backupModal">
+    <div class="modal-box">
+      <h3 style="color: #22c55e;">🔄 Histórico de Backups Salvos</h3>
+      <p style="font-size: 0.8rem; color: #94a3b8;">Escolha a versão para restaurar:</p>
+      <div id="backupListContainer" style="margin-top: 8px;"></div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+        <button class="btn-action-small" style="background: #475569;" onclick="closeBackupModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCl9L87mI-lb4lD1FeilBW0s0caOKYjeDU",
+      authDomain: "sorteio-ggeasy.firebaseapp.com",
+      databaseURL: "https://sorteio-ggeasy-default-rtdb.firebaseio.com",
+      projectId: "sorteio-ggeasy",
+      storageBucket: "sorteio-ggeasy.firebasestorage.app",
+      messagingSenderId: "502362048213",
+      appId: "1:502362048213:web:a67341ed7991045226845c",
+      measurementId: "G-LYSVC0WYH3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let participantsList = [];
+    let currentQty = 1;
+    let timerDeadline = null;
+    let timerInterval = null;
+
+    function maskPhone(input) {
+      let v = input.value.replace(/\D/g, "");
+      if (v.length > 11) v = v.substring(0, 11);
+      if (v.length > 10) {
+        v = v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      } else if (v.length > 5) {
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+      } else if (v.length > 2) {
+        v = v.replace(/^(\d{2})(\d{0,5})/, "($1");
+      } else if (v.length > 0) {
+        v = v.replace(/^(\d{0,2})/, "($1");
+      }
+      input.value = v;
+    }
+
+    db.ref('settings').on('value', (s) => {
+      const data = s.val();
+      if (data) {
+        if (data.title) document.getElementById('mainTitle').innerText = data.title;
+        if (data.subtitle) document.getElementById('mainSubtitle').innerText = data.subtitle;
+        timerDeadline = data.timerDeadline || null;
+        updateTimerLogic();
+      }
+    });
+
+    function updateTimerLogic() {
+      if (timerInterval) clearInterval(timerInterval);
+      const timerBadge = document.getElementById('timerDisplay');
+
+      if (!timerDeadline) {
+        timerBadge.style.display = 'none';
+        return;
+      }
+
+      timerBadge.style.display = 'block';
+
+      function checkCountdown() {
+        const now = new Date().getTime();
+        const distance = timerDeadline - now;
+
+        if (distance <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('countdownText').innerText = "00:00:00 (Encerrado)";
+          timerBadge.classList.add('expired');
+        } else {
+          timerBadge.classList.remove('expired');
+          const hours = Math.floor(distance / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+          document.getElementById('countdownText').innerText = 
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+      }
+
+      checkCountdown();
+      timerInterval = setInterval(checkCountdown, 1000);
+    }
+
+    function stopTimerDirectly() {
+      if (confirm("Deseja cancelar o limite de tempo e deixar as inscrições abertas sem relógio?")) {
+        db.ref('settings/timerDeadline').remove().then(() => {
+          alert("Cronômetro cancelado com sucesso!");
+        });
+      }
+    }
+
+    db.ref('participants').on('value', (s) => {
+      const data = s.val();
+      participantsList = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          participantsList.push({ ...data[key], firebaseKey: key });
+        });
+      }
+      document.getElementById('dbCounter').innerText = participantsList.length;
+      renderParticipants(participantsList);
+    });
+
+    function renderParticipants(list) {
+      const container = document.getElementById('participantsListContainer');
+      container.innerHTML = '';
+
+      if (list.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 10px; font-size: 0.85rem;">Nenhum participante encontrado.</div>';
+        return;
+      }
+
+      list.forEach(p => {
+        const phoneTxt = p.phone || 'Sem Tel';
+        const instaTxt = p.insta || 'Não inf.';
+        const ytTxt = p.yt || 'Não inf.';
+        const tiktokTxt = p.tiktok || 'Não inf.';
+
+        const item = document.createElement('div');
+        item.className = 'participant-item';
+        item.innerHTML = `
+          <div class="participant-info">
+            <span><strong>${p.name}</strong> (ID: ${p.id})</span>
+            <div class="participant-subinfo">
+              Tel: <span>${phoneTxt}</span> | Insta: <span>${instaTxt}</span><br>
+              YT: <span>${ytTxt}</span> | TikTok: <span>${tiktokTxt}</span>
+            </div>
+          </div>
+          <div class="user-actions">
+            <button class="btn-edit-user" onclick="openEditUserModal('${p.firebaseKey}')" title="Editar dados">✏️</button>
+            <button class="btn-delete-user" onclick="deleteParticipant('${p.firebaseKey}', '${p.name}')" title="Mover para lixeira">❌</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function filterParticipants() {
+      const q = document.getElementById('searchInscritos').value.toLowerCase().trim();
+      if (!q) {
+        renderParticipants(participantsList);
+        return;
+      }
+      const filtered = participantsList.filter(p => 
+        (p.name && p.name.toLowerCase().includes(q)) ||
+        (p.id && String(p.id).includes(q)) ||
+        (p.phone && p.phone.includes(q)) ||
+        (p.insta && p.insta.toLowerCase().includes(q)) ||
+        (p.yt && p.yt.toLowerCase().includes(q)) ||
+        (p.tiktok && p.tiktok.toLowerCase().includes(q))
+      );
+      renderParticipants(filtered);
+    }
+
+    function deleteParticipant(key, name) {
+      if (confirm(`Tem certeza que deseja apagar o participante "${name}"? Ele será movido para a Lixeira.`)) {
+        db.ref('participants/' + key).once('value', s => {
+          const userData = s.val();
+          if (userData) {
+            db.ref('deleted_participants').push({
+              ...userData,
+              deletedAt: new Date().toLocaleString('pt-BR')
+            });
+            db.ref('participants/' + key).remove().then(() => {
+              alert(`Participante "${name}" movido para a lixeira!`);
+            });
+          }
+        });
+      }
+    }
+
+    function openEditUserModal(key) {
+      const p = participantsList.find(x => x.firebaseKey === key);
+      if (!p) return;
+
+      document.getElementById('editUserKey').value = key;
+      document.getElementById('editUserName').value = p.name || '';
+      document.getElementById('editUserId').value = p.id || '';
+      document.getElementById('editUserPhone').value = p.phone || '';
+      document.getElementById('editUserInsta').value = p.insta || '';
+      document.getElementById('editUserYt').value = p.yt || '';
+      document.getElementById('editUserTiktok').value = p.tiktok || '';
+      
+      document.getElementById('editUserModal').style.display = 'flex';
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('editUserModal').style.display = 'none';
+    }
+
+    function saveUserEdit() {
+      const key = document.getElementById('editUserKey').value;
+      const updated = {
+        name: document.getElementById('editUserName').value.trim(),
+        id: document.getElementById('editUserId').value.trim(),
+        phone: document.getElementById('editUserPhone').value.trim(),
+        insta: document.getElementById('editUserInsta').value.trim(),
+        yt: document.getElementById('editUserYt').value.trim(),
+        tiktok: document.getElementById('editUserTiktok').value.trim()
+      };
+
+      if (!updated.name || !updated.id || !updated.phone) return alert("Preencha ao menos Nome, ID e Telefone!");
+
+      db.ref('participants/' + key).update(updated).then(() => {
+        closeEditUserModal();
+        alert("Dados do participante atualizados com sucesso!");
+      });
+    }
+
+    function openTrashModal() {
+      const container = document.getElementById('trashListContainer');
+      container.innerHTML = '<div style="color: #94a3b8; text-align: center;">Carregando excluídos...</div>';
+      document.getElementById('trashModal').style.display = 'flex';
+
+      db.ref('deleted_participants').once('value', s => {
+        const deletedData = s.val();
+        container.innerHTML = '';
+
+        if (!deletedData) {
+          container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">A lixeira está vazia.</div>';
+          return;
+        }
+
+        Object.keys(deletedData).reverse().forEach(k => {
+          const p = deletedData[k];
+          const div = document.createElement('div');
+          div.className = 'backup-item';
+          div.innerHTML = `
+            <div class="backup-info">
+              <span class="backup-date">👤 ${p.name} (ID: ${p.id})</span>
+              <span class="backup-details">Tel: ${p.phone || 'Sem Tel'} | Insta: ${p.insta || 'Não inf.'}</span>
+              <span class="backup-details" style="color: #ef4444; font-size: 0.7rem;">Excluído em: ${p.deletedAt || 'Data não registrada'}</span>
+            </div>
+            <div class="backup-actions">
+              <button class="btn-action-small btn-restore" onclick="restoreParticipantFromTrash('${k}')" title="Restaurar de volta para o sorteio">Restaurar</button>
+              <button class="btn-action-small" onclick="deleteParticipantPermanent('${k}')" title="Apagar definitivamente">🗑️</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function closeTrashModal() {
+      document.getElementById('trashModal').style.display = 'none';
+    }
+
+    function restoreParticipantFromTrash(key) {
+      db.ref('deleted_participants/' + key).once('value', s => {
+        const p = s.val();
+        if (p) {
+          const { deletedAt, ...activeUser } = p;
+          
+          if (participantsList.some(x => String(x.id).trim() === String(activeUser.id).trim())) {
+            return alert("Este ID já está presente na lista ativa de participantes!");
+          }
+
+          db.ref('participants').push(activeUser).then(() => {
+            db.ref('deleted_participants/' + key).remove().then(() => {
+              openTrashModal();
+              alert(`"${activeUser.name}" foi restaurado com sucesso!`);
+            });
+          });
+        }
+      });
+    }
+
+    function deleteParticipantPermanent(key) {
+      if (confirm("Apagar este participante definitivamente da lixeira? Esta ação não pode ser desfeita.")) {
+        db.ref('deleted_participants/' + key).remove().then(() => {
+          openTrashModal();
+        });
+      }
+    }
+
+    function setQty(qty) {
+      currentQty = qty;
+      document.querySelectorAll('.btn-qty').forEach((btn, i) => btn.classList.toggle('active', i + 1 === qty));
+    }
+
+    function openSettingsModal() {
+      document.getElementById('editTitleInput').value = document.getElementById('mainTitle').innerText;
+      document.getElementById('editSubtitleInput').value = document.getElementById('mainSubtitle').innerText;
+      document.getElementById('settingsModal').style.display = 'flex';
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function saveSettings() {
+      const newTitle = document.getElementById('editTitleInput').value.trim();
+      const newSubtitle = document.getElementById('editSubtitleInput').value.trim();
+      const timerOpt = document.getElementById('timerOptionSelect').value;
+      
+      if (!newTitle) return alert("O título não pode ficar vazio!");
+
+      const updates = { title: newTitle, subtitle: newSubtitle };
+
+      if (timerOpt === 'none') {
+        updates.timerDeadline = null;
+      } else if (timerOpt === '1h') {
+        updates.timerDeadline = Date.now() + (1 * 60 * 60 * 1000);
+      } else if (timerOpt === '6h') {
+        updates.timerDeadline = Date.now() + (6 * 60 * 60 * 1000);
+      } else if (timerOpt === '12h') {
+        updates.timerDeadline = Date.now() + (12 * 60 * 60 * 1000);
+      } else if (timerOpt === '24h') {
+        updates.timerDeadline = Date.now() + (24 * 60 * 60 * 1000);
+      }
+
+      db.ref('settings').update(updates).then(() => {
+        closeSettingsModal();
+        alert("Configurações atualizadas com sucesso!");
+      });
+    }
+
+    function clearDatabase() {
+      if (!confirm("Deseja criar um backup de segurança e zerar a lista de participantes?")) return;
+      
+      db.ref('participants').once('value', s => { 
+        const data = s.val();
+        if (data) {
+          const dateStr = new Date().toLocaleString('pt-BR');
+          const title = document.getElementById('mainTitle').innerText;
+          const subtitle = document.getElementById('mainSubtitle').innerText;
+          const count = Object.keys(data).length;
+          
+          db.ref('backups/history').push({
+            date: dateStr,
+            raffleName: `${title} - ${subtitle}`,
+            count: count,
+            participants: data
+          });
+        }
+        db.ref('participants').remove(); 
+        alert("Banco salvo no histórico de backups e zerado com sucesso!"); 
+      });
+    }
+
+    function openBackupModal() {
+      const container = document.getElementById('backupListContainer');
+      container.innerHTML = '<div style="color: #94a3b8; text-align: center;">Carregando histórico...</div>';
+      document.getElementById('backupModal').style.display = 'flex';
+
+      db.ref('backups/history').once('value', s => {
+        const backups = s.val();
+        container.innerHTML = '';
+
+        if (!backups) {
+          container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">Nenhum backup encontrado no histórico.</div>';
+          return;
+        }
+
+        const keys = Object.keys(backups).reverse();
+        keys.forEach(k => {
+          const b = backups[k];
+          const div = document.createElement('div');
+          div.className = 'backup-item';
+          div.innerHTML = `
+            <div class="backup-info">
+              <span class="backup-date">📅 ${b.date}</span>
+              <span class="backup-details">🏆 ${b.raffleName || 'Sorteio'}</span>
+              <span class="backup-details" style="color: #22c55e;">👥 ${b.count || Object.keys(b.participants || {}).length} inscritos</span>
+            </div>
+            <div class="backup-actions">
+              <button class="btn-action-small btn-restore" onclick="restoreSpecificBackup('${k}')">Restaurar</button>
+              <button class="btn-action-small" onclick="deleteBackupItem('${k}')" title="Excluir este backup">🗑️</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function closeBackupModal() {
+      document.getElementById('backupModal').style.display = 'none';
+    }
+
+    function restoreSpecificBackup(backupKey) {
+      if (!confirm("Restaurar este backup? Os participantes atuais serão substituídos pelos inscritos deste backup.")) return;
+
+      db.ref('backups/history/' + backupKey).once('value', s => {
+        const b = s.val();
+        if (b && b.participants) {
+          db.ref('participants').set(b.participants).then(() => {
+            closeBackupModal();
+            alert(`Backup de "${b.date}" restaurado com sucesso! (${b.count} inscritos)`);
+          });
+        } else {
+          alert("Não foi possível carregar os dados deste backup.");
+        }
+      });
+    }
+
+    function deleteBackupItem(backupKey) {
+      if (confirm("Excluir permanentemente este backup do histórico?")) {
+        db.ref('backups/history/' + backupKey).remove().then(() => {
+          openBackupModal();
+        });
+      }
+    }
+
+    function startDraw() {
+      if (participantsList.length < currentQty) return alert("Poucos inscritos no banco!");
+      
+      const btnDraw = document.getElementById('btnDraw');
+      btnDraw.disabled = true;
+      
+      const container = document.getElementById('winnersContainer');
+      container.innerHTML = '';
+      
+      const boxes = [];
+      for (let i = 0; i < currentQty; i++) {
+        const div = document.createElement('div');
+        div.className = 'roulette-box spinning';
+        div.innerHTML = `<div class="winner-tag">SORTEANDO GANHADOR ${i+1}...</div><div class="display-name" style="font-size: 1.3rem; color: #f59e0b; margin-top: 5px;">🎰 Girando...</div>`;
+        container.appendChild(div);
+        boxes.push(div);
+      }
+
+      let intervalCounter = 0;
+      const spinInterval = setInterval(() => {
+        boxes.forEach((box, i) => {
+          const rand = participantsList[Math.floor(Math.random() * participantsList.length)];
+          box.querySelector('.display-name').innerText = rand.name;
+        });
+        intervalCounter++;
+        
+        if (intervalCounter > 25) {
+          clearInterval(spinInterval);
+          finalizeDraw(boxes);
+          btnDraw.disabled = false;
+        }
+      }, 100);
+    }
+
+    function finalizeDraw(boxes) {
+      const winners = [...participantsList].sort(() => 0.5 - Math.random()).slice(0, currentQty);
+      
+      winners.forEach((w, i) => {
+        const cleanPhone = (w.phone || '').replace(/\D/g, '');
+        const phoneFormatted = w.phone || 'Não informado';
+        
+        const cleanInsta = (w.insta || '').replace('@', '').trim();
+        const instaLink = cleanInsta ? `<a href="https://instagram.com/${cleanInsta}" target="_blank" class="winner-link">@${cleanInsta} ↗</a>` : 'Não informado';
+        
+        const cleanTikTok = (w.tiktok || '').replace('@', '').trim();
+        const tiktokLink = cleanTikTok ? `<a href="https://tiktok.com/@${cleanTikTok}" target="_blank" class="winner-link">@${cleanTikTok} ↗</a>` : 'Não informado';
+        
+        const ytName = w.yt || 'Não informado';
+        
+        const waMsg = encodeURIComponent(`Olá ${w.name}! Você acabou de ser sorteado no sorteio do GGeasy!`);
+        const waButton = cleanPhone ? `<a href="https://wa.me/55${cleanPhone}?text=${waMsg}" target="_blank" class="btn-wa-direct">💬 Chamar no WhatsApp</a>` : '';
+
+        const div = boxes[i];
+        div.className = 'roulette-box winner';
+        div.innerHTML = `
+          <div class="winner-tag" style="color: #22c55e; font-weight: bold;">🏆 GANHADOR ${i+1}</div>
+          <div class="display-name" style="font-size: 1.3rem; font-weight: bold; color: #38bdf8; margin: 4px 0;">${w.name}</div>
+          <div class="winner-details">
+            <div><strong>ID:</strong> ${w.id} | <strong>Tel:</strong> ${phoneFormatted}</div>
+            <div><strong>📸 Insta:</strong> ${instaLink}</div>
+            <div><strong>▶️ YT:</strong> ${ytName}</div>
+            <div><strong>🎵 TikTok:</strong> ${tiktokLink}</div>
+            ${waButton}
+          </div>
+        `;
+        db.ref('archives/winners').push({ winner: w, time: new Date().toLocaleString() });
+      });
+
+      confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+    }
+  </script>
+</body>
+</html>
