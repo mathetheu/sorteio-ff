@@ -44,8 +44,12 @@
     .logo-container { width: 100%; display: flex; justify-content: center; margin-bottom: 12px; }
     .logo-img { width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 3px solid #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
     h1 { text-align: center; color: #38bdf8; font-size: 1.7rem; text-transform: uppercase; margin-bottom: 4px; }
-    .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; }
+    .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 12px; }
     
+    .timer-badge { display: none; margin: 0 auto 16px auto; background: rgba(2, 6, 23, 0.85); border: 1px solid #38bdf8; border-radius: 30px; padding: 8px 18px; font-size: 0.9rem; font-weight: 700; color: #38bdf8; text-align: center; width: fit-content; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
+    .timer-badge.expired { border-color: #ef4444; color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
+    .closed-alert { display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ef4444; padding: 14px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 0.9rem; margin-bottom: 15px; }
+
     .rules-card { background: #090d16; border: 1px solid #334155; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: 0.85rem; }
     .rules-card ul { padding-left: 18px; color: #cbd5e1; }
     .highlight-rule { color: #38bdf8; font-weight: 600; }
@@ -59,13 +63,14 @@
     
     .form-box { background: rgba(2, 6, 23, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
     .input-group label { display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px; }
-    .input-group input { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; outline: none; }
-    .input-group input:focus { border-color: #38bdf8; }
+    .input-group input, .input-group select { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; outline: none; }
+    .input-group input:focus, .input-group select:focus { border-color: #38bdf8; }
     .checklist-container { background: #090d16; border: 1px solid #334155; padding: 10px; border-radius: 8px; margin-bottom: 5px; }
     .check-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; cursor: pointer; }
     
     .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 8px; color: white; font-weight: 800; cursor: pointer; transition: 0.2s; }
     .btn-submit:hover { filter: brightness(1.1); }
+    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
     
     .admin-tools { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid #334155; }
     .admin-tools h4 { color: #38bdf8; margin-bottom: 10px; font-size: 0.95rem; }
@@ -161,7 +166,6 @@
     .btn-qty { background: #1e293b; color: white; border: 1px solid #334155; padding: 5px 12px; cursor: pointer; border-radius: 5px; }
     .btn-qty.active { background: #0284c7; border: 1px solid #38bdf8; }
 
-    /* Modais */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -207,7 +211,7 @@
 <body>
 
   <div class="container">
-    <button class="btn-settings-gear" id="btnSettingsGear" style="display: none;" onclick="openSettingsModal()" title="Editar Nome e Prêmio do Sorteio">⚙️</button>
+    <button class="btn-settings-gear" id="btnSettingsGear" style="display: none;" onclick="openSettingsModal()" title="Editar Nome, Prêmio e Tempo do Sorteio">⚙️</button>
 
     <div class="tabs-nav">
       <button class="tab-btn active" id="tabRegisterBtn" onclick="switchTab('register')">📝 Inscrição</button>
@@ -217,6 +221,12 @@
     <div class="logo-container"><img src="logo.png" alt="Logo" class="logo-img"></div>
     <h1 id="mainTitle">SORTEIO DO GGEASY</h1>
     <p class="subtitle" id="mainSubtitle">Codiguin Punho + MP5</p>
+
+    <!-- Badge do Cronômetro -->
+    <div class="timer-badge" id="timerDisplay">⏳ Inscrições encerram em: <span id="countdownText">--:--:--</span></div>
+
+    <!-- Alerta de Inscrições Encerradas -->
+    <div class="closed-alert" id="closedAlert">🚫 Inscrições encerradas! O tempo limite para participar deste sorteio acabou.</div>
 
     <!-- ABA 1: Inscrição -->
     <div id="sectionRegister">
@@ -293,6 +303,19 @@
         <label>O que é o Sorteio (Subtítulo / Prêmio):</label>
         <input type="text" id="editSubtitleInput" placeholder="Ex: Codiguin Punho + MP5">
       </div>
+      
+      <div class="input-group">
+        <label>Tempo Limite de Inscrição:</label>
+        <select id="timerOptionSelect">
+          <option value="keep">Manter configuração atual</option>
+          <option value="none">Sem tempo limite (Inscrições livres)</option>
+          <option value="1h">1 Hora a partir de agora</option>
+          <option value="6h">6 Horas a partir de agora</option>
+          <option value="12h">12 Horas a partir de agora</option>
+          <option value="24h">24 Horas a partir de agora</option>
+        </select>
+      </div>
+
       <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">
         <button class="btn-action-small" style="background: #475569;" onclick="closeSettingsModal()">Cancelar</button>
         <button class="btn-action-small btn-restore" onclick="saveSettings()">Salvar Alterações</button>
@@ -342,7 +365,7 @@
     </div>
   </div>
 
-  <script>
+<script>
     const firebaseConfig = {
       apiKey: "AIzaSyCl9L87mI-lb4lD1FeilBW0s0caOKYjeDU",
       authDomain: "sorteio-ggeasy.firebaseapp.com",
@@ -358,6 +381,8 @@
     const db = firebase.database();
     let participantsList = [];
     let currentQty = 1;
+    let timerDeadline = null;
+    let timerInterval = null;
 
     function maskPhone(input) {
       let v = input.value.replace(/\D/g, "");
@@ -367,7 +392,7 @@
       } else if (v.length > 5) {
         v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
       } else if (v.length > 2) {
-        v = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+        v = v.replace(/^(\d{2})(\d{0,5})/, "($1");
       } else if (v.length > 0) {
         v = v.replace(/^(\d{0,2})/, "($1");
       }
@@ -379,8 +404,53 @@
       if (data) {
         if (data.title) document.getElementById('mainTitle').innerText = data.title;
         if (data.subtitle) document.getElementById('mainSubtitle').innerText = data.subtitle;
+        timerDeadline = data.timerDeadline || null;
+        updateTimerLogic();
       }
     });
+
+    function updateTimerLogic() {
+      if (timerInterval) clearInterval(timerInterval);
+      const timerBadge = document.getElementById('timerDisplay');
+      const closedAlert = document.getElementById('closedAlert');
+      const regForm = document.querySelector('.form-box');
+
+      if (!timerDeadline) {
+        timerBadge.style.display = 'none';
+        closedAlert.style.display = 'none';
+        regForm.style.display = 'flex';
+        return;
+      }
+
+      timerBadge.style.display = 'block';
+
+      function checkCountdown() {
+        const now = new Date().getTime();
+        const distance = timerDeadline - now;
+
+        if (distance <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('countdownText').innerText = "00:00:00 (Encerrado)";
+          timerBadge.classList.add('expired');
+          closedAlert.style.display = 'block';
+          regForm.style.display = 'none';
+        } else {
+          timerBadge.classList.remove('expired');
+          closedAlert.style.display = 'none';
+          regForm.style.display = 'flex';
+
+          const hours = Math.floor(distance / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+          document.getElementById('countdownText').innerText = 
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+      }
+
+      checkCountdown();
+      timerInterval = setInterval(checkCountdown, 1000);
+    }
 
     db.ref('participants').on('value', (s) => {
       const data = s.val();
@@ -445,18 +515,15 @@
       renderParticipants(filtered);
     }
 
-    /* EXCLUSÃO COM ENVIO PARA A LIXEIRA */
     function deleteParticipant(key, name) {
       if (confirm(`Tem certeza que deseja apagar o participante "${name}"? Ele será movido para a Lixeira e você poderá recuperá-lo se quiser.`)) {
         db.ref('participants/' + key).once('value', s => {
           const userData = s.val();
           if (userData) {
-            // Salva na lixeira com a data de exclusão
             db.ref('deleted_participants').push({
               ...userData,
               deletedAt: new Date().toLocaleString('pt-BR')
             });
-            // Remove da lista ativa
             db.ref('participants/' + key).remove().then(() => {
               alert(`Participante "${name}" movido para a lixeira!`);
             });
@@ -465,7 +532,6 @@
       }
     }
 
-    /* MODAL DE EDIÇÃO DIRETA */
     function openEditUserModal(key) {
       const p = participantsList.find(x => x.firebaseKey === key);
       if (!p) return;
@@ -504,7 +570,6 @@
       });
     }
 
-    /* MODAL DA LIXEIRA DE EXCLUÍDOS */
     function openTrashModal() {
       const container = document.getElementById('trashListContainer');
       container.innerHTML = '<div style="color: #94a3b8; text-align: center;">Carregando excluídos...</div>';
@@ -549,14 +614,13 @@
         if (p) {
           const { deletedAt, ...activeUser } = p;
           
-          // Verifica se o ID já voltou a existir na lista ativa
           if (participantsList.some(x => String(x.id).trim() === String(activeUser.id).trim())) {
             return alert("Este ID já está presente na lista ativa de participantes!");
           }
 
           db.ref('participants').push(activeUser).then(() => {
             db.ref('deleted_participants/' + key).remove().then(() => {
-              openTrashModal(); // Recarrega a lixeira
+              openTrashModal();
               alert(`"${activeUser.name}" foi restaurado com sucesso para a lista de participantes!`);
             });
           });
@@ -599,20 +663,37 @@
     function saveSettings() {
       const newTitle = document.getElementById('editTitleInput').value.trim();
       const newSubtitle = document.getElementById('editSubtitleInput').value.trim();
+      const timerOpt = document.getElementById('timerOptionSelect').value;
       
       if (!newTitle) return alert("O título não pode ficar vazio!");
 
-      db.ref('settings').set({
-        title: newTitle,
-        subtitle: newSubtitle
-      }).then(() => {
+      const updates = { title: newTitle, subtitle: newSubtitle };
+
+      if (timerOpt === 'none') {
+        updates.timerDeadline = null;
+      } else if (timerOpt === '1h') {
+        updates.timerDeadline = Date.now() + (1 * 60 * 60 * 1000);
+      } else if (timerOpt === '6h') {
+        updates.timerDeadline = Date.now() + (6 * 60 * 60 * 1000);
+      } else if (timerOpt === '12h') {
+        updates.timerDeadline = Date.now() + (12 * 60 * 60 * 1000);
+      } else if (timerOpt === '24h') {
+        updates.timerDeadline = Date.now() + (24 * 60 * 60 * 1000);
+      }
+
+      db.ref('settings').update(updates).then(() => {
         closeSettingsModal();
-        alert("Informações do sorteio atualizadas com sucesso!");
+        alert("Configurações do sorteio atualizadas com sucesso!");
       });
     }
 
     function handleRegistration(e) {
       e.preventDefault();
+
+      if (timerDeadline && Date.now() > timerDeadline) {
+        return alert("As inscrições para este sorteio já foram encerradas!");
+      }
+
       const p = { 
         name: document.getElementById('regName').value.trim(), 
         id: document.getElementById('regId').value.trim(), 
