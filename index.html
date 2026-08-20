@@ -9,16 +9,14 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
-	.tabs-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-.tab-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
-.tab-btn.active { background: #0284c7; border-color: #38bdf8; color: #fff; }
-
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background: radial-gradient(circle at top, #0284c7, #0f172a, #020617); color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
     .container { max-width: 760px; width: 100%; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); backdrop-filter: blur(14px); border-radius: 18px; padding: 28px; box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6); position: relative; }
-
-
     
+    .tabs-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+    .tab-btn { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+    .tab-btn.active { background: #0284c7; border-color: #38bdf8; color: #fff; }
+
     .logo-container { width: 100%; display: flex; justify-content: center; margin-bottom: 12px; }
     .logo-img { width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 3px solid #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
     h1 { text-align: center; color: #38bdf8; font-size: 1.7rem; text-transform: uppercase; margin-bottom: 4px; }
@@ -48,20 +46,19 @@
     
     .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 8px; color: white; font-weight: 800; cursor: pointer; transition: 0.2s; }
     .btn-submit:hover { filter: brightness(1.1); }
-    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
   </style>
 </head>
 <body>
 
   <div class="container">
+    <div class="tabs-nav">
+      <button class="tab-btn active">📝 Inscrição</button>
+      <button class="tab-btn" onclick="goToAdmin()">🎰 Painel Admin</button>
+    </div>
+
     <div class="logo-container"><img src="logo.png" alt="Logo" class="logo-img"></div>
     <h1 id="mainTitle">SORTEIO DO GGEASY</h1>
     <p class="subtitle" id="mainSubtitle">Codiguin Punho + MP5</p>
-
-<div class="tabs-nav">
-  <button class="tab-btn active" id="tabRegisterBtn" onclick="switchTab('register')">📝 Inscrição</button>
-  <button class="tab-btn" id="tabDrawBtn" onclick="window.location.href='/admin.html'">🎰 Painel Admin</button>
-</div>
 
     <!-- Badge do Cronômetro -->
     <div class="timer-badge" id="timerDisplay">⏳ Inscrições encerram em: <span id="countdownText">--:--:--</span></div>
@@ -120,6 +117,17 @@
     const db = firebase.database();
     let timerDeadline = null;
     let timerInterval = null;
+
+    function goToAdmin() {
+      const pass = prompt("Senha de Administrador:");
+      if (!pass) return;
+      if (pass.trim() === "ggeasy22722424") {
+        sessionStorage.setItem("admin_auth", "true");
+        window.location.href = "admin.html";
+      } else {
+        alert("Senha incorreta!");
+      }
+    }
 
     function maskPhone(input) {
       let v = input.value.replace(/\D/g, "");
@@ -198,7 +206,6 @@
 
       const inputId = document.getElementById('regId').value.trim();
 
-      // Validação de ID único direto na consulta do Firebase
       db.ref('participants').orderByChild('id').equalTo(inputId).once('value', snapshot => {
         if (snapshot.exists()) {
           return alert("Este ID já está cadastrado no sorteio!");
