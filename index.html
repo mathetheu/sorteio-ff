@@ -44,40 +44,8 @@
     .logo-container { width: 100%; display: flex; justify-content: center; margin-bottom: 12px; }
     .logo-img { width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 3px solid #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.6); }
     h1 { text-align: center; color: #38bdf8; font-size: 1.7rem; text-transform: uppercase; margin-bottom: 4px; }
-    .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 14px; }
+    .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; }
     
-    .timer-badge {
-      display: none;
-      margin: 0 auto 20px auto;
-      background: rgba(2, 6, 23, 0.85);
-      border: 1px solid #38bdf8;
-      border-radius: 30px;
-      padding: 8px 18px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #38bdf8;
-      text-align: center;
-      width: fit-content;
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
-    }
-    .timer-badge.expired {
-      border-color: #ef4444;
-      color: #ef4444;
-      box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
-    }
-
-    .closed-alert {
-      display: none;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid #ef4444;
-      color: #ef4444;
-      padding: 16px;
-      border-radius: 10px;
-      text-align: center;
-      font-weight: 700;
-      margin-bottom: 15px;
-    }
-
     .rules-card { background: #090d16; border: 1px solid #334155; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: 0.85rem; }
     .rules-card ul { padding-left: 18px; color: #cbd5e1; }
     .highlight-rule { color: #38bdf8; font-weight: 600; }
@@ -91,14 +59,13 @@
     
     .form-box { background: rgba(2, 6, 23, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
     .input-group label { display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px; }
-    .input-group input, .input-group select { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; outline: none; }
-    .input-group input:focus, .input-group select:focus { border-color: #38bdf8; }
+    .input-group input { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; outline: none; }
+    .input-group input:focus { border-color: #38bdf8; }
     .checklist-container { background: #090d16; border: 1px solid #334155; padding: 10px; border-radius: 8px; margin-bottom: 5px; }
     .check-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; cursor: pointer; }
     
     .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 8px; color: white; font-weight: 800; cursor: pointer; transition: 0.2s; }
     .btn-submit:hover { filter: brightness(1.1); }
-    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
     
     .admin-tools { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid #334155; }
     .admin-tools h4 { color: #38bdf8; margin-bottom: 10px; font-size: 0.95rem; }
@@ -194,6 +161,7 @@
     .btn-qty { background: #1e293b; color: white; border: 1px solid #334155; padding: 5px 12px; cursor: pointer; border-radius: 5px; }
     .btn-qty.active { background: #0284c7; border: 1px solid #38bdf8; }
 
+    /* Modais */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -239,7 +207,7 @@
 <body>
 
   <div class="container">
-    <button class="btn-settings-gear" id="btnSettingsGear" style="display: none;" onclick="openSettingsModal()" title="Editar Nome, Prêmio e Tempo do Sorteio">⚙️</button>
+    <button class="btn-settings-gear" id="btnSettingsGear" style="display: none;" onclick="openSettingsModal()" title="Editar Nome e Prêmio do Sorteio">⚙️</button>
 
     <div class="tabs-nav">
       <button class="tab-btn active" id="tabRegisterBtn" onclick="switchTab('register')">📝 Inscrição</button>
@@ -249,12 +217,6 @@
     <div class="logo-container"><img src="logo.png" alt="Logo" class="logo-img"></div>
     <h1 id="mainTitle">SORTEIO DO GGEASY</h1>
     <p class="subtitle" id="mainSubtitle">Codiguin Punho + MP5</p>
-
-    <!-- Badge do Cronômetro -->
-    <div class="timer-badge" id="timerDisplay">⏳ Inscrições encerram em: <span id="countdownText">--:--:--</span></div>
-
-    <!-- Alerta de Inscrições Encerradas -->
-    <div class="closed-alert" id="closedAlert">🚫 Inscrições encerradas! O tempo limite para participar deste sorteio acabou.</div>
 
     <!-- ABA 1: Inscrição -->
     <div id="sectionRegister">
@@ -272,7 +234,7 @@
           <a href="https://www.tiktok.com/@ggeasyoficial_" target="_blank" rel="noopener noreferrer" class="social-btn btn-tiktok">🎵 TikTok</a>
         </div>
       </div>
-      <form class="form-box" id="regForm" onsubmit="handleRegistration(event)">
+      <form class="form-box" onsubmit="handleRegistration(event)">
         <div class="input-group"><label>Nick:</label><input type="text" id="regName" required></div>
         <div class="input-group"><label>ID:</label><input type="number" id="regId" required></div>
         <div class="input-group"><label>WhatsApp com DDD:</label><input type="tel" id="regPhone" placeholder="(11) 99999-9999" maxlength="15" oninput="maskPhone(this)" required></div>
@@ -288,7 +250,7 @@
           <label class="check-item"><input type="checkbox" id="c4" required> Estou no grupo do WhatsApp</label>
         </div>
 
-        <button type="submit" class="btn-submit" id="btnSubmitForm">Confirmar Participação</button>
+        <button type="submit" class="btn-submit">Confirmar Participação</button>
       </form>
     </div>
 
@@ -331,25 +293,6 @@
         <label>O que é o Sorteio (Subtítulo / Prêmio):</label>
         <input type="text" id="editSubtitleInput" placeholder="Ex: Codiguin Punho + MP5">
       </div>
-      
-      <div class="input-group">
-        <label>Tempo Limite de Inscrição:</label>
-        <select id="timerOptionSelect" onchange="toggleCustomTimerInput()">
-          <option value="keep">Manter configuração atual</option>
-          <option value="none">Sem tempo limite (Inscrições livres)</option>
-          <option value="1h">1 Hora a partir de agora</option>
-          <option value="6h">6 Horas a partir de agora</option>
-          <option value="12h">12 Horas a partir de agora</option>
-          <option value="24h">24 Horas a partir de agora</option>
-          <option value="custom">Data e Hora Específica</option>
-        </select>
-      </div>
-
-      <div class="input-group" id="customTimerGroup" style="display: none;">
-        <label>Escolha a data e hora do encerramento:</label>
-        <input type="datetime-local" id="customDateTimeInput">
-      </div>
-
       <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">
         <button class="btn-action-small" style="background: #475569;" onclick="closeSettingsModal()">Cancelar</button>
         <button class="btn-action-small btn-restore" onclick="saveSettings()">Salvar Alterações</button>
@@ -415,9 +358,6 @@
     const db = firebase.database();
     let participantsList = [];
     let currentQty = 1;
-    let timerDeadline = null;
-    let timerInterval = null;
-    let isRegistrationClosed = false;
 
     function maskPhone(input) {
       let v = input.value.replace(/\D/g, "");
@@ -439,64 +379,419 @@
       if (data) {
         if (data.title) document.getElementById('mainTitle').innerText = data.title;
         if (data.subtitle) document.getElementById('mainSubtitle').innerText = data.subtitle;
-        
-        timerDeadline = data.timerDeadline || null;
-        updateTimerLogic();
       }
     });
 
-    function updateTimerLogic() {
-      if (timerInterval) clearInterval(timerInterval);
+    db.ref('participants').on('value', (s) => {
+      const data = s.val();
+      participantsList = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          participantsList.push({ ...data[key], firebaseKey: key });
+        });
+      }
+      document.getElementById('dbCounter').innerText = participantsList.length;
+      renderParticipants(participantsList);
+    });
 
-      const timerBadge = document.getElementById('timerDisplay');
-      const closedAlert = document.getElementById('closedAlert');
-      const regForm = document.getElementById('regForm');
-      const btnSubmit = document.getElementById('btnSubmitForm');
+    function renderParticipants(list) {
+      const container = document.getElementById('participantsListContainer');
+      container.innerHTML = '';
 
-      if (!timerDeadline) {
-        timerBadge.style.display = 'none';
-        closedAlert.style.display = 'none';
-        regForm.style.display = 'flex';
-        btnSubmit.disabled = false;
-        isRegistrationClosed = false;
+      if (list.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 10px; font-size: 0.85rem;">Nenhum participante encontrado.</div>';
         return;
       }
 
-      timerBadge.style.display = 'block';
+      list.forEach(p => {
+        const phoneTxt = p.phone || 'Sem Tel';
+        const instaTxt = p.insta || 'Não inf.';
+        const ytTxt = p.yt || 'Não inf.';
+        const tiktokTxt = p.tiktok || 'Não inf.';
 
-      function checkCountdown() {
-        const now = new Date().getTime();
-        const distance = timerDeadline - now;
+        const item = document.createElement('div');
+        item.className = 'participant-item';
+        item.innerHTML = `
+          <div class="participant-info">
+            <span><strong>${p.name}</strong> (ID: ${p.id})</span>
+            <div class="participant-subinfo">
+              Tel: <span>${phoneTxt}</span> | Insta: <span>${instaTxt}</span><br>
+              YT: <span>${ytTxt}</span> | TikTok: <span>${tiktokTxt}</span>
+            </div>
+          </div>
+          <div class="user-actions">
+            <button class="btn-edit-user" onclick="openEditUserModal('${p.firebaseKey}')" title="Editar dados">✏️</button>
+            <button class="btn-delete-user" onclick="deleteParticipant('${p.firebaseKey}', '${p.name}')" title="Mover para lixeira">❌</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
 
-        if (distance <= 0) {
-          clearInterval(timerInterval);
-          document.getElementById('countdownText').innerText = "00:00:00 (Encerrado)";
-          timerBadge.classList.add('expired');
-          closedAlert.style.display = 'block';
-          regForm.style.display = 'none';
-          btnSubmit.disabled = true;
-          isRegistrationClosed = true;
+    function filterParticipants() {
+      const q = document.getElementById('searchInscritos').value.toLowerCase().trim();
+      if (!q) {
+        renderParticipants(participantsList);
+        return;
+      }
+      const filtered = participantsList.filter(p => 
+        (p.name && p.name.toLowerCase().includes(q)) ||
+        (p.id && String(p.id).includes(q)) ||
+        (p.phone && p.phone.includes(q)) ||
+        (p.insta && p.insta.toLowerCase().includes(q)) ||
+        (p.yt && p.yt.toLowerCase().includes(q)) ||
+        (p.tiktok && p.tiktok.toLowerCase().includes(q))
+      );
+      renderParticipants(filtered);
+    }
+
+    /* EXCLUSÃO COM ENVIO PARA A LIXEIRA */
+    function deleteParticipant(key, name) {
+      if (confirm(`Tem certeza que deseja apagar o participante "${name}"? Ele será movido para a Lixeira e você poderá recuperá-lo se quiser.`)) {
+        db.ref('participants/' + key).once('value', s => {
+          const userData = s.val();
+          if (userData) {
+            // Salva na lixeira com a data de exclusão
+            db.ref('deleted_participants').push({
+              ...userData,
+              deletedAt: new Date().toLocaleString('pt-BR')
+            });
+            // Remove da lista ativa
+            db.ref('participants/' + key).remove().then(() => {
+              alert(`Participante "${name}" movido para a lixeira!`);
+            });
+          }
+        });
+      }
+    }
+
+    /* MODAL DE EDIÇÃO DIRETA */
+    function openEditUserModal(key) {
+      const p = participantsList.find(x => x.firebaseKey === key);
+      if (!p) return;
+
+      document.getElementById('editUserKey').value = key;
+      document.getElementById('editUserName').value = p.name || '';
+      document.getElementById('editUserId').value = p.id || '';
+      document.getElementById('editUserPhone').value = p.phone || '';
+      document.getElementById('editUserInsta').value = p.insta || '';
+      document.getElementById('editUserYt').value = p.yt || '';
+      document.getElementById('editUserTiktok').value = p.tiktok || '';
+      
+      document.getElementById('editUserModal').style.display = 'flex';
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('editUserModal').style.display = 'none';
+    }
+
+    function saveUserEdit() {
+      const key = document.getElementById('editUserKey').value;
+      const updated = {
+        name: document.getElementById('editUserName').value.trim(),
+        id: document.getElementById('editUserId').value.trim(),
+        phone: document.getElementById('editUserPhone').value.trim(),
+        insta: document.getElementById('editUserInsta').value.trim(),
+        yt: document.getElementById('editUserYt').value.trim(),
+        tiktok: document.getElementById('editUserTiktok').value.trim()
+      };
+
+      if (!updated.name || !updated.id || !updated.phone) return alert("Preencha ao menos Nome, ID e Telefone!");
+
+      db.ref('participants/' + key).update(updated).then(() => {
+        closeEditUserModal();
+        alert("Dados do participante atualizados com sucesso!");
+      });
+    }
+
+    /* MODAL DA LIXEIRA DE EXCLUÍDOS */
+    function openTrashModal() {
+      const container = document.getElementById('trashListContainer');
+      container.innerHTML = '<div style="color: #94a3b8; text-align: center;">Carregando excluídos...</div>';
+      document.getElementById('trashModal').style.display = 'flex';
+
+      db.ref('deleted_participants').once('value', s => {
+        const deletedData = s.val();
+        container.innerHTML = '';
+
+        if (!deletedData) {
+          container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">A lixeira está vazia.</div>';
+          return;
+        }
+
+        Object.keys(deletedData).reverse().forEach(k => {
+          const p = deletedData[k];
+          const div = document.createElement('div');
+          div.className = 'backup-item';
+          div.innerHTML = `
+            <div class="backup-info">
+              <span class="backup-date">👤 ${p.name} (ID: ${p.id})</span>
+              <span class="backup-details">Tel: ${p.phone || 'Sem Tel'} | Insta: ${p.insta || 'Não inf.'}</span>
+              <span class="backup-details" style="color: #ef4444; font-size: 0.7rem;">Excluído em: ${p.deletedAt || 'Data não registrada'}</span>
+            </div>
+            <div class="backup-actions">
+              <button class="btn-action-small btn-restore" onclick="restoreParticipantFromTrash('${k}')" title="Restaurar de volta para o sorteio">Restaurar</button>
+              <button class="btn-action-small" onclick="deleteParticipantPermanent('${k}')" title="Apagar definitivamente">🗑️</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function closeTrashModal() {
+      document.getElementById('trashModal').style.display = 'none';
+    }
+
+    function restoreParticipantFromTrash(key) {
+      db.ref('deleted_participants/' + key).once('value', s => {
+        const p = s.val();
+        if (p) {
+          const { deletedAt, ...activeUser } = p;
+          
+          // Verifica se o ID já voltou a existir na lista ativa
+          if (participantsList.some(x => String(x.id).trim() === String(activeUser.id).trim())) {
+            return alert("Este ID já está presente na lista ativa de participantes!");
+          }
+
+          db.ref('participants').push(activeUser).then(() => {
+            db.ref('deleted_participants/' + key).remove().then(() => {
+              openTrashModal(); // Recarrega a lixeira
+              alert(`"${activeUser.name}" foi restaurado com sucesso para a lista de participantes!`);
+            });
+          });
+        }
+      });
+    }
+
+    function deleteParticipantPermanent(key) {
+      if (confirm("Apagar este participante definitivamente da lixeira? Esta ação não pode ser desfeita.")) {
+        db.ref('deleted_participants/' + key).remove().then(() => {
+          openTrashModal();
+        });
+      }
+    }
+
+    function setQty(qty) {
+      currentQty = qty;
+      document.querySelectorAll('.btn-qty').forEach((btn, i) => btn.classList.toggle('active', i + 1 === qty));
+    }
+
+    function switchTab(tab) {
+      if (tab === 'draw' && prompt("Senha:") !== "ggeasy22722424") return alert("Senha incorreta!");
+      document.getElementById('sectionRegister').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('sectionDraw').style.display = tab === 'draw' ? 'block' : 'none';
+      document.getElementById('btnSettingsGear').style.display = tab === 'draw' ? 'flex' : 'none';
+      document.getElementById('tabRegisterBtn').classList.toggle('active', tab === 'register');
+      document.getElementById('tabDrawBtn').classList.toggle('active', tab === 'draw');
+    }
+
+    function openSettingsModal() {
+      document.getElementById('editTitleInput').value = document.getElementById('mainTitle').innerText;
+      document.getElementById('editSubtitleInput').value = document.getElementById('mainSubtitle').innerText;
+      document.getElementById('settingsModal').style.display = 'flex';
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function saveSettings() {
+      const newTitle = document.getElementById('editTitleInput').value.trim();
+      const newSubtitle = document.getElementById('editSubtitleInput').value.trim();
+      
+      if (!newTitle) return alert("O título não pode ficar vazio!");
+
+      db.ref('settings').set({
+        title: newTitle,
+        subtitle: newSubtitle
+      }).then(() => {
+        closeSettingsModal();
+        alert("Informações do sorteio atualizadas com sucesso!");
+      });
+    }
+
+    function handleRegistration(e) {
+      e.preventDefault();
+      const p = { 
+        name: document.getElementById('regName').value.trim(), 
+        id: document.getElementById('regId').value.trim(), 
+        phone: document.getElementById('regPhone').value.trim(),
+        insta: document.getElementById('regInsta').value.trim(),
+        yt: document.getElementById('regYt').value.trim(),
+        tiktok: document.getElementById('regTiktok').value.trim()
+      };
+
+      if(participantsList.some(x => String(x.id).trim() === p.id)) return alert("ID já cadastrado!");
+
+      db.ref('participants').push(p).then(() => {
+        alert("Inscrição confirmada!");
+        document.getElementById('regName').value = '';
+        document.getElementById('regId').value = '';
+        document.getElementById('regPhone').value = '';
+        document.getElementById('regInsta').value = '';
+        document.getElementById('regYt').value = '';
+        document.getElementById('regTiktok').value = '';
+        ['c1','c2','c3','c4'].forEach(id => document.getElementById(id).checked = false);
+      });
+    }
+
+    function clearDatabase() {
+      if (!confirm("Deseja criar um backup de segurança e zerar a lista de participantes?")) return;
+      
+      db.ref('participants').once('value', s => { 
+        const data = s.val();
+        if(data) {
+          const dateStr = new Date().toLocaleString('pt-BR');
+          const title = document.getElementById('mainTitle').innerText;
+          const subtitle = document.getElementById('mainSubtitle').innerText;
+          const count = Object.keys(data).length;
+          
+          db.ref('backups/history').push({
+            date: dateStr,
+            raffleName: `${title} - ${subtitle}`,
+            count: count,
+            participants: data
+          });
+        }
+        db.ref('participants').remove(); 
+        alert("Banco salvo no histórico de backups e zerado com sucesso!"); 
+      });
+    }
+
+    function openBackupModal() {
+      const container = document.getElementById('backupListContainer');
+      container.innerHTML = '<div style="color: #94a3b8; text-align: center;">Carregando histórico...</div>';
+      document.getElementById('backupModal').style.display = 'flex';
+
+      db.ref('backups/history').once('value', s => {
+        const backups = s.val();
+        container.innerHTML = '';
+
+        if (!backups) {
+          container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">Nenhum backup encontrado no histórico.</div>';
+          return;
+        }
+
+        const keys = Object.keys(backups).reverse();
+        keys.forEach(k => {
+          const b = backups[k];
+          const div = document.createElement('div');
+          div.className = 'backup-item';
+          div.innerHTML = `
+            <div class="backup-info">
+              <span class="backup-date">📅 ${b.date}</span>
+              <span class="backup-details">🏆 ${b.raffleName || 'Sorteio'}</span>
+              <span class="backup-details" style="color: #22c55e;">👥 ${b.count || Object.keys(b.participants || {}).length} inscritos</span>
+            </div>
+            <div class="backup-actions">
+              <button class="btn-action-small btn-restore" onclick="restoreSpecificBackup('${k}')">Restaurar</button>
+              <button class="btn-action-small" onclick="deleteBackupItem('${k}')" title="Excluir este backup">🗑️</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    function closeBackupModal() {
+      document.getElementById('backupModal').style.display = 'none';
+    }
+
+    function restoreSpecificBackup(backupKey) {
+      if (!confirm("Restaurar este backup? Os participantes atuais serão substituídos pelos inscritos deste backup.")) return;
+
+      db.ref('backups/history/' + backupKey).once('value', s => {
+        const b = s.val();
+        if (b && b.participants) {
+          db.ref('participants').set(b.participants).then(() => {
+            closeBackupModal();
+            alert(`Backup de "${b.date}" restaurado com sucesso! (${b.count} inscritos)`);
+          });
         } else {
-          timerBadge.classList.remove('expired');
-          closedAlert.style.display = 'none';
-          regForm.style.display = 'flex';
-          btnSubmit.disabled = false;
-          isRegistrationClosed = false;
+          alert("Não foi possível carregar os dados deste backup.");
+        }
+      });
+    }
 
-          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floorPara identificar por que o painel de administração não está abrindo, verifique os pontos mais comuns abaixo:
+    function deleteBackupItem(backupKey) {
+      if (confirm("Excluir permanentemente este backup do histórico?")) {
+        db.ref('backups/history/' + backupKey).remove().then(() => {
+          openBackupModal();
+        });
+      }
+    }
 
-**Verificações Rápidas no Navegador**
-* **Aba anônima:** Abra a URL em uma janela anônima para descartar cache antigo ou cookies corrompidos de sessão.
-* **Console de erros (F12):** Abra o Developer Tools, vá na aba **Console** e recarregue a página para ver se há erros de script (JS), bloqueios de CORS ou falhas de carregamento.
-* **Aba Network:** Veja o status code das requisições principais (`403 Forbidden`, `404 Not Found`, `500 Internal Server Error` ou `502/504 Gateway Timeout`).
+    function startDraw() {
+      if (participantsList.length < currentQty) return alert("Poucos inscritos no banco!");
+      
+      const btnDraw = document.getElementById('btnDraw');
+      btnDraw.disabled = true;
+      
+      const container = document.getElementById('winnersContainer');
+      container.innerHTML = '';
+      
+      const boxes = [];
+      for(let i = 0; i < currentQty; i++) {
+        const div = document.createElement('div');
+        div.className = 'roulette-box spinning';
+        div.innerHTML = `<div class="winner-tag">SORTEANDO GANHADOR ${i+1}...</div><div class="display-name" style="font-size: 1.3rem; color: #f59e0b; margin-top: 5px;">🎰 Girando...</div>`;
+        container.appendChild(div);
+        boxes.push(div);
+      }
 
-**Checagem do Servidor e Aplicação**
-* **Servidor / API rodando:** Se o painel for uma SPA (React, Vue, etc.) que depende de um backend separado, confirme se o backend/API está ativo e respondendo na porta correta.
-* **Logs de erro:** Acesse o terminal/servidor e veja os logs mais recentes da aplicação (ex: `pm2 logs`, `docker logs <container>` ou `tail -f /var/log/nginx/error.log`).
-* **Regras de Firewall / Proxy:** Verifique se as rotas `/admin` não foram bloqueadas por regras de Nginx/Apache, Cloudflare, ou se o IP de origem mudou caso haja whitelist configurada.
-* **Tokens e Permissões:** Se a página carrega em branco logo após o login, confira se o `localStorage`/cookie de autenticação contém o token válido e se o usuário tem a flag de administrador ativa no banco de dados.
+      let intervalCounter = 0;
+      const spinInterval = setInterval(() => {
+        boxes.forEach((box, i) => {
+          const rand = participantsList[Math.floor(Math.random() * participantsList.length)];
+          box.querySelector('.display-name').innerText = rand.name;
+        });
+        intervalCounter++;
+        
+        if (intervalCounter > 25) {
+          clearInterval(spinInterval);
+          finalizeDraw(boxes);
+          btnDraw.disabled = false;
+        }
+      }, 100);
+    }
 
-Qual é a mensagem de erro, status HTTP ou comportamento exato (ex: tela branca, erro 404/500, loop de redirecionamento) que está aparecendo?
+    function finalizeDraw(boxes) {
+      const winners = [...participantsList].sort(() => 0.5 - Math.random()).slice(0, currentQty);
+      
+      winners.forEach((w, i) => {
+        const cleanPhone = (w.phone || '').replace(/\D/g, '');
+        const phoneFormatted = w.phone || 'Não informado';
+        
+        const cleanInsta = (w.insta || '').replace('@', '').trim();
+        const instaLink = cleanInsta ? `<a href="https://instagram.com/${cleanInsta}" target="_blank" class="winner-link">@${cleanInsta} ↗</a>` : 'Não informado';
+        
+        const cleanTikTok = (w.tiktok || '').replace('@', '').trim();
+        const tiktokLink = cleanTikTok ? `<a href="https://tiktok.com/@${cleanTikTok}" target="_blank" class="winner-link">@${cleanTikTok} ↗</a>` : 'Não informado';
+        
+        const ytName = w.yt || 'Não informado';
+        
+        const waMsg = encodeURIComponent(`Olá ${w.name}! Você acabou de ser sorteado no sorteio do GGeasy!`);
+        const waButton = cleanPhone ? `<a href="https://wa.me/55${cleanPhone}?text=${waMsg}" target="_blank" class="btn-wa-direct">💬 Chamar no WhatsApp</a>` : '';
+
+        const div = boxes[i];
+        div.className = 'roulette-box winner';
+        div.innerHTML = `
+          <div class="winner-tag" style="color: #22c55e; font-weight: bold;">🏆 GANHADOR ${i+1}</div>
+          <div class="display-name" style="font-size: 1.3rem; font-weight: bold; color: #38bdf8; margin: 4px 0;">${w.name}</div>
+          <div class="winner-details">
+            <div><strong>ID:</strong> ${w.id} | <strong>Tel:</strong> ${phoneFormatted}</div>
+            <div><strong>📸 Insta:</strong> ${instaLink}</div>
+            <div><strong>▶️ YT:</strong> ${ytName}</div>
+            <div><strong>🎵 TikTok:</strong> ${tiktokLink}</div>
+            ${waButton}
+          </div>
+        `;
+        db.ref('archives/winners').push({ winner: w, time: new Date().toLocaleString() });
+      });
+
+      confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+    }
+  </script>
+</body>
+</html>
