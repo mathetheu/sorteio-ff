@@ -36,7 +36,7 @@
     .form-box { background: rgba(2, 6, 23, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
     .input-group label { display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px; }
     .input-group input { width: 100%; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; }
-    .checklist-container { background: #090d16; border: 1px solid #334155; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+    .checklist-container { background: #090d16; border: 1px solid #334155; padding: 10px; border-radius: 8px; margin-bottom: 5px; }
     .check-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 5px; cursor: pointer; }
     
     .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 8px; color: white; font-weight: 800; cursor: pointer; }
@@ -47,13 +47,25 @@
     .btn-restore { background: #22c55e; }
     
     .participants-list-box { background: #000; padding: 10px; border-radius: 8px; border: 1px solid #334155; max-height: 250px; overflow-y: auto; margin-top: 10px; }
-    .participant-item { padding: 8px; border-bottom: 1px solid #1e293b; font-size: 0.85rem; display: flex; justify-content: space-between; }
+    .participant-item { padding: 10px 8px; border-bottom: 1px solid #1e293b; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: flex-start; }
+    .participant-info { display: flex; flex-direction: column; gap: 2px; }
+    .participant-subinfo { font-size: 0.75rem; color: #94a3b8; line-height: 1.3; }
+    .participant-subinfo span { color: #38bdf8; }
     
     .roulette-box { background: #050b14; border: 2px solid #0284c7; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 10px; }
     .roulette-box.spinning { border-color: #f59e0b; }
     .roulette-box.winner { border-color: #22c55e; transform: scale(1.02); }
     .winners-grid { display: grid; gap: 10px; margin-bottom: 20px; }
     
+    .winner-details {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     .btn-draw { width: 100%; padding: 15px; background: linear-gradient(135deg, #0284c7, #2563eb); border: none; border-radius: 10px; color: white; font-weight: 800; cursor: pointer; margin-bottom: 15px; }
     .controls-wrapper { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
     .btn-qty { background: #1e293b; color: white; border: 1px solid #334155; padding: 5px 12px; cursor: pointer; border-radius: 5px; }
@@ -77,19 +89,23 @@
         <ul>
           <li>Apenas 1 conta/ID por pessoa.</li>
           <li class="highlight-rule">📲 Obrigatório estar no grupo do WhatsApp.</li>
-          <li>Obrigatório seguir nas redes sociais:</li>
+          <li>Obrigatório seguir nas redes sociais abaixo:</li>
         </ul>
         <div class="social-links-grid">
-          <a href="https://www.instagram.com/ggeasy" class="social-btn btn-insta">📸 Insta</a>
-          <a href="https://www.youtube.com/@GGeasyYT" class="social-btn btn-yt">▶️ YT</a>
-          <a href="https://www.tiktok.com/@ggeasyoficial_" class="social-btn btn-tiktok">🎵 TikTok</a>
+          <a href="https://www.instagram.com/ggeasy" target="_blank" rel="noopener noreferrer" class="social-btn btn-insta">📸 Insta</a>
+          <a href="https://www.youtube.com/@GGeasyYT" target="_blank" rel="noopener noreferrer" class="social-btn btn-yt">▶️ YT</a>
+          <a href="https://www.tiktok.com/@ggeasyoficial_" target="_blank" rel="noopener noreferrer" class="social-btn btn-tiktok">🎵 TikTok</a>
         </div>
       </div>
       <form class="form-box" onsubmit="handleRegistration(event)">
         <div class="input-group"><label>Nick:</label><input type="text" id="regName" required></div>
         <div class="input-group"><label>ID:</label><input type="number" id="regId" required></div>
-        <div class="input-group"><label>WhatsApp:</label><input type="tel" id="regPhone" required></div>
+        <div class="input-group"><label>WhatsApp com DDD:</label><input type="tel" id="regPhone" placeholder="Ex: 11999999999" required></div>
         
+        <div class="input-group"><label>Seu @ no Instagram:</label><input type="text" id="regInsta" placeholder="Ex: @seunome" required></div>
+        <div class="input-group"><label>Seu canal/nome no YouTube:</label><input type="text" id="regYt" placeholder="Ex: @seucanal" required></div>
+        <div class="input-group"><label>Seu @ no TikTok:</label><input type="text" id="regTiktok" placeholder="Ex: @seutiktok" required></div>
+
         <div class="checklist-container">
           <label class="check-item"><input type="checkbox" id="c1" required> Segui no Instagram @ggeasy</label>
           <label class="check-item"><input type="checkbox" id="c2" required> Segui no YouTube @GGeasyYT</label>
@@ -147,7 +163,21 @@
       const container = document.getElementById('participantsListContainer');
       container.innerHTML = '';
       participantsList.forEach(p => {
-        container.innerHTML += `<div class="participant-item"><span>${p.name}</span> <span>ID: ${p.id}</span></div>`;
+        const phoneTxt = p.phone || 'Sem Tel';
+        const instaTxt = p.insta || 'Não inf.';
+        const ytTxt = p.yt || 'Não inf.';
+        const tiktokTxt = p.tiktok || 'Não inf.';
+
+        container.innerHTML += `
+          <div class="participant-item">
+            <div class="participant-info">
+              <span><strong>${p.name}</strong> (ID: ${p.id})</span>
+              <div class="participant-subinfo">
+                Tel: <span>${phoneTxt}</span> | Insta: <span>${instaTxt}</span><br>
+                YT: <span>${ytTxt}</span> | TikTok: <span>${tiktokTxt}</span>
+              </div>
+            </div>
+          </div>`;
       });
     });
 
@@ -164,37 +194,74 @@
 
     function handleRegistration(e) {
       e.preventDefault();
-      const p = { name: document.getElementById('regName').value, id: document.getElementById('regId').value, phone: document.getElementById('regPhone').value };
-      if(participantsList.some(x => x.id === p.id)) return alert("ID já cadastrado!");
+      const p = { 
+        name: document.getElementById('regName').value.trim(), 
+        id: document.getElementById('regId').value.trim(), 
+        phone: document.getElementById('regPhone').value.trim(),
+        insta: document.getElementById('regInsta').value.trim(),
+        yt: document.getElementById('regYt').value.trim(),
+        tiktok: document.getElementById('regTiktok').value.trim()
+      };
+
+      if(participantsList.some(x => String(x.id).trim() === p.id)) return alert("ID já cadastrado!");
+
       db.ref('participants').push(p).then(() => {
         alert("Inscrição confirmada!");
         document.getElementById('regName').value = '';
         document.getElementById('regId').value = '';
         document.getElementById('regPhone').value = '';
+        document.getElementById('regInsta').value = '';
+        document.getElementById('regYt').value = '';
+        document.getElementById('regTiktok').value = '';
         ['c1','c2','c3','c4'].forEach(id => document.getElementById(id).checked = false);
       });
     }
 
     function clearDatabase() {
       if (!confirm("Salvar backup e zerar?")) return;
-      db.ref('participants').once('value', s => { if(s.val()) db.ref('backups/last').set(s.val()); db.ref('participants').remove(); alert("Zerado!"); });
+      db.ref('participants').once('value', s => { 
+        if(s.val()) db.ref('backups/last').set(s.val()); 
+        db.ref('participants').remove(); 
+        alert("Zerado com sucesso!"); 
+      });
     }
 
     function restoreBackup() {
-      db.ref('backups/last').once('value', s => { if(s.val()) { db.ref('participants').set(s.val()); alert("Restaurado!"); } else alert("Sem backup."); });
+      db.ref('backups/last').once('value', s => { 
+        if(s.val()) { 
+          db.ref('participants').set(s.val()); 
+          alert("Restaurado com sucesso!"); 
+        } else {
+          alert("Sem backup encontrado.");
+        }
+      });
     }
 
     function startDraw() {
-      if (participantsList.length < currentQty) return alert("Poucos inscritos!");
+      if (participantsList.length < currentQty) return alert("Poucos inscritos no banco!");
       const container = document.getElementById('winnersContainer');
       container.innerHTML = '';
       
       const winners = [...participantsList].sort(() => 0.5 - Math.random()).slice(0, currentQty);
       
       winners.forEach((w, i) => {
+        const phoneDisplay = w.phone || 'Não informado';
+        const instaDisplay = w.insta || 'Não informado';
+        const ytDisplay = w.yt || 'Não informado';
+        const tiktokDisplay = w.tiktok || 'Não informado';
+
         const div = document.createElement('div');
         div.className = 'roulette-box winner';
-        div.innerHTML = `<div class="winner-tag">GANHADOR ${i+1}</div><div class="display-name">${w.name}</div><div class="display-id">ID: ${w.id} | Tel: ${w.phone}</div>`;
+        div.innerHTML = `
+          <div class="winner-tag">GANHADOR ${i+1}</div>
+          <div class="display-name" style="font-size: 1.2rem; font-weight: bold; color: #38bdf8;">${w.name}</div>
+          <div class="winner-details">
+            <div><strong>ID:</strong> ${w.id} | <strong>Tel:</strong> ${phoneDisplay}</div>
+            <div><strong>📸 Insta:</strong> ${instaDisplay}</div>
+            <div><strong>▶️ YT:</strong> ${ytDisplay}</div>
+            <div><strong>🎵 TikTok:</strong> ${tiktokDisplay}</div>
+          </div>
+        `;
         container.appendChild(div);
         db.ref('archives/winners').push({ winner: w, time: new Date().toLocaleString() });
       });
